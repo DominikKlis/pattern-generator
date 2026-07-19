@@ -190,8 +190,9 @@ body.ui-dark .sidebar::-webkit-scrollbar-thumb{background:#4a4a4a}
 .section > .sec-head{
   display:flex;align-items:center;gap:8px;cursor:pointer;
   padding:9px 11px;user-select:none;
-  font-weight:600;font-size:12px;letter-spacing:.4px;text-transform:uppercase;color:var(--text-dim);
+  font-weight:600;font-size:12px;letter-spacing:0;text-transform:uppercase;color:var(--text-dim);
 }
+.section > .sec-head .sec-label{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .section > .sec-head:hover{color:var(--text)}
 .section > .sec-head .chev{margin-left:auto;transition:transform .15s;color:var(--text-faint)}
 .section.collapsed > .sec-head .chev{transform:rotate(-90deg)}
@@ -548,7 +549,7 @@ body.ui-dark .export-popover{box-shadow:0 12px 34px rgba(0,0,0,.55)}
 .sidebar .section:first-of-type{border:1px solid var(--line);padding-top:14px}
 .section > .sec-head{
   padding:0 0 12px;font-family:var(--sans);font-size:13px;font-weight:700;
-  line-height:18px;letter-spacing:.08em;color:var(--text);cursor:pointer;
+  line-height:18px;letter-spacing:0;color:var(--text);cursor:pointer;
 }
 .section > .sec-head .chev{color:var(--text-faint)}
 .section.collapsed > .sec-head{padding-bottom:0}
@@ -698,6 +699,7 @@ input[type=color].swatch-custom.is-active{border:1px solid var(--accent)}
 .inline-toggle input[type=checkbox]{width:18px;height:18px;flex:none}
 /* Dim the swatches while transparent is active (toggle stays clickable) */
 #bgColorField.is-disabled{opacity:.4;pointer-events:none}
+.field.is-disabled{opacity:.4;pointer-events:none}
 /* Sub-group divider inside a section (e.g. Typography under Text) */
 .subgroup{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
 .subgroup.first{margin-top:0;padding-top:0;border-top:0}
@@ -762,6 +764,8 @@ body.ui-dark .subgroup{border-top-color:var(--line)}
 .dropzone.has-image .dropzone-empty{display:none}
 .dropzone.has-image .dropzone-filled{display:flex}
 .btn.sm{min-height:24px;padding:3px 9px;font-size:11px;align-self:flex-start}
+.dropzone-actions{display:flex;flex-wrap:wrap;gap:6px}
+.dropzone-actions .btn.sm{align-self:auto}
 
 /* Dark theme */
 body.ui-dark .swatch,body.ui-dark .ratio-tile,
@@ -953,7 +957,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
     <!-- Text: content + base typography combined -->
     <div class="section" data-sec="content">
-      <div class="sec-head">Text <span class="chev">▾</span></div>
+      <div class="sec-head"><span class="sec-label">Text</span> <span class="chev">▾</span></div>
       <div class="sec-body">
 
         <!-- 1 · Words -->
@@ -983,21 +987,28 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
           </div>
         </div>
 
-        <!-- 3 · Size & spacing -->
+        <!-- 3 · Size -->
         <div class="subgroup">
-          <div class="field">
+          <div class="field" id="fontSizeField">
             <label for="fontSize">Font size</label>
-            <div class="slider-row"><input type="range" id="fontSize" min="4" max="120" value="26" aria-label="Font size"><input type="number" id="fontSizeN" min="4" max="120" value="26" aria-label="Font size value"></div>
+            <div class="slider-row"><input type="range" id="fontSize" min="4" max="160" value="26" aria-label="Font size"><input type="number" id="fontSizeN" min="4" max="160" value="26" aria-label="Font size value"></div>
           </div>
+          <!-- Circle replaces the single font-size slider with outer/inner ring sizes -->
+          <div id="circleSizeControl" hidden></div>
+        </div>
+
+        <!-- 4 · Font weight (concentric only; hidden when empty) -->
+        <div class="subgroup" id="ringWeightGroup" hidden>
+          <span class="mini-label">Font weight</span>
+          <div id="ringWeightControl"></div>
+        </div>
+
+        <!-- 5 · Repeat spacing (always last) -->
+        <div class="subgroup">
           <div class="field">
             <label for="offset">Repeat spacing</label>
             <div class="slider-row"><input type="range" id="offset" min="0" max="300" value="16" step="1" aria-label="Repeat spacing"><input type="number" id="offsetN" min="0" max="300" value="16" step="1" aria-label="Repeat spacing value"></div>
           </div>
-        </div>
-
-        <!-- 4 · Ring weight (concentric only; hidden when empty) -->
-        <div class="subgroup" id="ringWeightGroup" hidden>
-          <div id="ringWeightControl"></div>
         </div>
 
       </div>
@@ -1036,7 +1047,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
       <!-- Shape: picker + shape-specific adjustments -->
       <div class="section" data-sec="shape">
-        <div class="sec-head">Shape <span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Shape</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="shape-grid" id="shapeGrid"></div>
           <div class="subgroup" id="shapeCtlGroup" hidden>
@@ -1048,7 +1059,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
       <!-- Layout: pattern arrangement + transform -->
       <div class="section" data-sec="layout">
-        <div class="sec-head">Layout <span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Layout</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="subgroup first">
             <div id="patternControls"></div>
@@ -1085,7 +1096,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
       <!-- Background fill -->
       <div class="section" data-sec="bg">
-        <div class="sec-head">Background <span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Background</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="field" id="bgColorField">
             <label>Fill color</label>
@@ -1102,7 +1113,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
       <!-- Dimensions -->
       <div class="section" data-sec="dims">
-        <div class="sec-head">Dimensions <span id="dimsBadge" class="badge">1200 × 1200</span><span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Dimensions</span> <span id="dimsBadge" class="badge">1200 × 1200</span><span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="field">
             <label>Aspect ratio</label>
@@ -1125,7 +1136,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
       <!-- Layer images -->
       <div class="section" data-sec="images">
-        <div class="sec-head">Images <span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Images</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="field">
             <label>Background <span class="layer-tag">under pattern</span></label>
@@ -1156,7 +1167,10 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
                 <img class="dropzone-thumb" id="fgImageThumb" alt="">
                 <div class="dropzone-meta">
                   <span class="image-file-name" id="fgImageName">No image selected</span>
-                  <button class="btn ghost sm" type="button" id="removeFgImage" disabled>Remove</button>
+                  <div class="dropzone-actions">
+                    <button class="btn ghost sm" type="button" id="cutoutFgImage" disabled>✂ Cut out subject</button>
+                    <button class="btn ghost sm" type="button" id="removeFgImage" disabled>Remove</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1171,7 +1185,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
     <div class="sidebar-tab-panel" data-panel="animate" id="panel-animate" role="tabpanel" aria-labelledby="tab-animate" tabindex="0" hidden>
 
       <div class="section" data-sec="anim">
-        <div class="sec-head">Animation <span class="chev">▾</span></div>
+        <div class="sec-head"><span class="sec-label">Animation</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <label class="inline-toggle" id="animEnabledRow">
             <input type="checkbox" id="animEnabled">
@@ -1187,7 +1201,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
           <div class="subgroup" id="animSpinGroup">
             <span class="mini-label">Spin</span>
             <div class="field"><label for="animSpeed">Speed (RPM)</label>
-              <div class="slider-row"><input type="range" id="animSpeed" min="0" max="10" step="0.5" value="1" aria-label="Spin rotations per minute"><input type="number" id="animSpeedN" min="0" max="10" step="0.5" value="1" aria-label="Spin speed value"></div>
+              <div class="slider-row"><input type="range" id="animSpeed" min="0" max="10" step="0.1" value="1" aria-label="Spin rotations per minute"><input type="number" id="animSpeedN" min="0" max="10" step="0.1" value="1" aria-label="Spin speed value"></div>
             </div>
             <div class="field"><label for="animDir">Direction</label>
               <select id="animDir" aria-label="Spin direction">
@@ -1201,12 +1215,13 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
           <div class="subgroup" id="animPulseGroup">
             <span class="mini-label">Pulse</span>
-            <div class="field"><label for="animPulseAmp">Amount</label>
-              <div class="slider-row"><input type="range" id="animPulseAmp" min="0" max="0.5" step="0.01" value="0.1" aria-label="Pulse amount"><input type="number" id="animPulseAmpN" min="0" max="0.5" step="0.01" value="0.1" aria-label="Pulse amount value"></div>
+            <div class="field"><label for="animPulseAmp">Grow by (%)</label>
+              <div class="slider-row"><input type="range" id="animPulseAmp" min="0" max="50" step="1" value="10" aria-label="Pulse grow percent"><input type="number" id="animPulseAmpN" min="0" max="50" step="1" value="10" aria-label="Pulse grow percent value"></div>
             </div>
-            <div class="field"><label for="animPulseRpm">Speed (cycles/min)</label>
-              <div class="slider-row"><input type="range" id="animPulseRpm" min="0" max="10" step="0.5" value="1" aria-label="Pulse cycles per minute"><input type="number" id="animPulseRpmN" min="0" max="10" step="0.5" value="1" aria-label="Pulse speed value"></div>
+            <div class="field"><label for="animPulseRpm">Speed (pulses/min)</label>
+              <div class="slider-row"><input type="range" id="animPulseRpm" min="0" max="160" step="1" value="12" aria-label="Pulses per minute"><input type="number" id="animPulseRpmN" min="0" max="160" step="1" value="12" aria-label="Pulse speed value"></div>
             </div>
+            <div class="hint">Pattern swells to +Grow% at each pulse's peak, then back to full size.</div>
           </div>
 
           <div class="subgroup" id="animFadeGroup">
@@ -1218,7 +1233,26 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
               </select>
             </div>
             <div class="field" id="animFadeSpeedField"><label for="animFadeRpm">Speed (cycles/min)</label>
-              <div class="slider-row"><input type="range" id="animFadeRpm" min="0" max="10" step="0.5" value="1" aria-label="Fade cycles per minute"><input type="number" id="animFadeRpmN" min="0" max="10" step="0.5" value="1" aria-label="Fade speed value"></div>
+              <div class="slider-row"><input type="range" id="animFadeRpm" min="0" max="160" step="1" value="1" aria-label="Fade cycles per minute"><input type="number" id="animFadeRpmN" min="0" max="160" step="1" value="1" aria-label="Fade speed value"></div>
+            </div>
+            <div class="field" id="animFadeInField"><label for="animFadeIn">Fade-in (s)</label>
+              <div class="slider-row"><input type="range" id="animFadeIn" min="0.1" max="10" step="0.1" value="1" aria-label="Intro fade-in seconds"><input type="number" id="animFadeInN" min="0.1" max="10" step="0.1" value="1" aria-label="Fade-in seconds value"></div>
+            </div>
+          </div>
+
+          <div class="subgroup" id="animAudioGroup">
+            <span class="mini-label">Audio reactive</span>
+            <label class="inline-toggle"><input type="checkbox" id="audioReactive"><span>React to audio</span></label>
+            <div class="hint">Enabled motions (spin, pulse, fade) follow live audio instead of the timed loop. Preview only — not written to Lottie.</div>
+            <div id="audioControls">
+              <label class="inline-toggle"><input type="checkbox" id="audioFlash"><span>Flash / brightness</span></label>
+              <div class="field"><label for="audioSens">Sensitivity</label>
+                <div class="slider-row"><input type="range" id="audioSens" min="0.5" max="4" step="0.1" value="1.5" aria-label="Audio sensitivity"><input type="number" id="audioSensN" min="0.5" max="4" step="0.1" value="1.5" aria-label="Audio sensitivity value"></div>
+              </div>
+              <div class="btn-group" style="margin-top:8px">
+                <button class="btn primary" id="audioCapture" type="button">▶ Capture audio</button>
+              </div>
+              <div class="hint" id="audioStatus">Click Capture, pick a tab or window, and tick “Share tab audio.”</div>
             </div>
           </div>
 
@@ -1331,12 +1365,12 @@ const DEFAULT_STATE = {
     w:0.6, h:1, radius:40, sides:6, points:5, innerRatio:0.5, rotate:0,
     spiralTurns:4, spiralSpacing:34, spiralAutoSpacing:true, waveAmp:70, waveFreq:3, thickness:60,
     steps:5, stepW:80, stepH:80, topW:120, baseW:520, teeth:12,
-    rayStart:24, rayLines:1, rayLineGap:1.3, rayRot:0,
+    rayStart:24, rayLines:1, rayLineGap:6, rayRot:0,
     pyrSteps:3, mtnHeight:1, pyrGap:5, pyrFit:1
   },
   // pattern params
   patternInset:0, // global: insets whole pattern (all modes) toward center
-  concentric:{ rings:2, spacing:41, autoSpacing:true, dir:"inward", alternate:false, ringTexts:["Pattern Playground","DEICHTOR HALLEN","Pattern","Playground"], weightVary:true, weightStart:800, weightEnd:100 },
+  concentric:{ rings:2, gap:6, dir:"inward", sizeVary:false, outerPx:40, innerPx:14, alternate:false, ringTexts:["Pattern Playground","DEICHTOR HALLEN"], weightVary:true, weightStart:800, weightEnd:100, weightRepeatVary:false, weightRepeatStart:100, weightRepeatEnd:800 },
   // per-line text (HTML) for sun rays; blank line uses main editor text
   radialLineTexts:[],
   // animation (preview + Lottie export)
@@ -1345,14 +1379,17 @@ const DEFAULT_STATE = {
     // Each motion has its own speed (rotations or cycles per min, 0–10 in 0.5 steps).
     // Shared loop period = 120/gcd(2·speeds) → every motion runs whole cycles → seamless.
     rpm:1,                // spin speed (rotations/min); counter-rotate reuses this
-    pulseRpm:1,           // scale-pulse speed (cycles/min)
+    pulseRpm:12,          // scale-pulse speed (breaths/min)
     fadeRpm:1,            // fade speed (cycles/min)
     fallbackLoop:2,       // loop length (s) used when nothing is spinning/cycling
     fps:30,
     motions:{ spin:false, pulse:false, fade:false, counterRotate:false },
     spinDir:-1,           // 1 = clockwise, -1 = counter-clockwise (default)
     pulseAmp:0.1,         // ± fraction of scale
-    fadeMode:"loop"       // loop | intro
+    fadeMode:"loop",      // loop | intro
+    fadeInSec:1,          // intro fade-in duration (s), independent of the loop period
+    // Audio-reactive preview (live only — never exported to Lottie).
+    audio:{ reactive:false, sens:1.5, flash:false }
   },
   // content is stored separately as HTML
   contentHTML:"DEICHTOR HALLEN Pattern Playground"
@@ -1477,6 +1514,26 @@ function measureRun(r){
 }
 function measureRuns(runs){ let w=0; for(const r of runs) w+=measureRun(r); return w; }
 
+/* Real vertical ink extent (px) of a run list at base font size: max ascent above
+   the baseline and max descent below, via canvas actualBoundingBox. Used to space
+   concentric rings by true glyph height instead of a fontSize heuristic — so a
+   ring's band never collides with its neighbor regardless of case/weight/font. */
+function measureRunsVExtent(runs){
+  let asc=0, desc=0;
+  for(const r of (runs||[])){
+    if(!r.text) continue;
+    const size=runEffSize(r);
+    const weight=(r.bold?"700":state.fontWeight);
+    const style=(r.italic||state.italic)?"italic":"normal";
+    _measCtx.font=`${style} ${weight} ${size}px ${runFamily(r)}`;
+    const m=_measCtx.measureText(r.text);
+    asc =Math.max(asc,  (m.actualBoundingBoxAscent  ?? size*0.72));
+    desc=Math.max(desc, (m.actualBoundingBoxDescent ?? size*0.22));
+  }
+  if(asc===0 && desc===0){ asc=state.fontSize*0.72; desc=state.fontSize*0.22; }
+  return {asc, desc};
+}
+
 /* Gap (px) inserted between consecutive content repeats. Applied as a `dx` on the
    first tspan of each repeat after the first (see contentGap()). */
 function contentGap(){ return Math.max(0, state.offset||0); }
@@ -1571,7 +1628,10 @@ function createShapePath(shapeType, sp){
   switch(shapeType){
     case "circle":{
       const r=R;
-      outline=`M ${cx-r} ${cy} a ${r} ${r} 0 1 1 ${2*r} 0 a ${r} ${r} 0 1 1 ${-2*r} 0 Z`;
+      // Start the path at the BOTTOM (6 o'clock) so the text-repeat seam / cutoff
+      // lands there, where it's least noticeable. Same clockwise direction as before
+      // (bottom → left → top → right → bottom).
+      outline=`M ${cx} ${cy+r} a ${r} ${r} 0 1 1 0 ${-2*r} a ${r} ${r} 0 1 1 0 ${2*r} Z`;
       clip=outline; bbox={x:cx-r,y:cy-r,w:2*r,h:2*r};
       break;
     }
@@ -1599,7 +1659,10 @@ function createShapePath(shapeType, sp){
     }
     case "snail":
     case "spiral":{
-      const turns=clamp(sp.spiralTurns,1,10), spc=sp.spiralSpacing;
+      const turns=clamp(sp.spiralTurns,1,10);
+      // Snail always derives turn spacing from font size (no manual control); the
+      // spiral shape keeps its own configurable spacing.
+      const spc=(shapeType==="snail")?clamp(Math.round(state.fontSize*SNAIL_SPACING_RATIO),10,80):sp.spiralSpacing;
       let d=""; const steps=turns*60; let first=true;
       for(let i=0;i<=steps;i++){
         const a=i/60*2*Math.PI; const r=spc*a/(2*Math.PI)*1.0 + 8;
@@ -1635,43 +1698,172 @@ function createShapePath(shapeType, sp){
     }
     default:{
       const r=R;
-      outline=`M ${cx-r} ${cy} a ${r} ${r} 0 1 1 ${2*r} 0 a ${r} ${r} 0 1 1 ${-2*r} 0 Z`;
+      outline=`M ${cx} ${cy+r} a ${r} ${r} 0 1 1 0 ${-2*r} a ${r} ${r} 0 1 1 0 ${2*r} Z`;
       clip=outline; bbox={x:cx-r,y:cy-r,w:2*r,h:2*r};
     }
   }
   return {outline, clip, cx, cy, bbox, extra:extra||{}};
 }
 
-/* Concentric contours by scaling around center */
-function createConcentricPaths(shapeType, sp, count, spacing, dir){
+/* Per-ring scale factors (f = ringRadius / Rref) when auto-spacing by real glyph
+   height. Because a ring's text scales with f, its scaled ascent = asc*f, so the
+   non-overlap condition solves without iteration (see below). metrics[i]={asc,desc}
+   are the ring's unscaled ink extents; gap is extra whitespace between bands (px). */
+// Shrink-in geometry: text scales WITH each ring (rendered height = metric*f), so
+// the band extents are expressed as fractions of Rref. This is the self-consistent
+// baseline case. Returns geometry factors f[] (radius = f*Rref).
+function shrinkInFactors(count, dir, metrics, gap, Rref){
+  const f=[];
+  if(dir==="inward"){
+    // ring 0 outermost at Rref, each next inset by prev descent + this ascent + gap
+    f[0]=1;
+    for(let i=1;i<count;i++){
+      const prev=f[i-1]*Rref;
+      const Ri=(prev*(1 - metrics[i-1].desc/Rref) - gap)/(1 + metrics[i].asc/Rref);
+      f[i]=Ri/Rref;
+    }
+  } else if(dir==="outward"){
+    f[0]=1;
+    for(let i=1;i<count;i++){
+      const prev=f[i-1]*Rref;
+      const Ri=(prev*(1 + metrics[i-1].asc/Rref) + gap)/(1 - metrics[i].desc/Rref);
+      f[i]=Ri/Rref;
+    }
+  } else { // centered: build outward chain, then scale so the middle ring sits at Rref
+    const c=[Rref];
+    for(let i=1;i<count;i++){
+      const prev=c[i-1];
+      c[i]=(prev*(1 + metrics[i-1].asc/Rref) + gap)/(1 - metrics[i].desc/Rref);
+    }
+    const mid=(count-1)/2, lo=Math.floor(mid), hi=Math.ceil(mid);
+    const Rmid=(c[lo]+c[hi])/2, k=Rmid>0? Rref/Rmid : 1;
+    for(let i=0;i<count;i++) f[i]=c[i]*k/Rref;
+  }
+  return f;
+}
+
+// General geometry solver: text is rendered at an ABSOLUTE size per ring, so each
+// ring's band extent is metric*ts[i] px (ts = font multiplier vs fontSize, known
+// up front). Radii are spaced so consecutive text bands clear by `gap`. Used by the
+// uniform / shrink-out modes where glyph height does NOT track the ring radius.
+function absoluteFactors(count, dir, metrics, gap, Rref, ts){
+  const asc=i=>metrics[i].asc*ts[i], desc=i=>metrics[i].desc*ts[i];
+  const R=[Rref];
+  if(dir==="inward"){
+    for(let i=1;i<count;i++) R[i]=R[i-1]-desc(i-1)-gap-asc(i);
+  } else if(dir==="outward"){
+    for(let i=1;i<count;i++) R[i]=R[i-1]+asc(i-1)+gap+desc(i);
+  } else { // centered: outward chain, then shift radii so the middle ring sits at Rref
+    for(let i=1;i<count;i++) R[i]=R[i-1]+asc(i-1)+gap+desc(i);
+    const mid=(count-1)/2, lo=Math.floor(mid), hi=Math.ceil(mid);
+    const off=Rref-(R[lo]+R[hi])/2;
+    for(let i=0;i<count;i++) R[i]+=off;
+  }
+  return R.map(r=>r/Rref);
+}
+
+// Returns {f, ts}: f = ring radius factors, ts = per-ring font multiplier vs
+// fontSize (so rendered glyph height = metric*ts). textSize mode drives the split:
+//   shrink-in  — text scales with the ring (ts=f), classic look
+//   uniform    — every ring one size (ts=1), radii spaced for constant text
+//   shrink-out — mirror of shrink-in: big inside, small outside
+function metricScaleFactors(count, dir, metrics, gap, Rref, textSize, outerScale, innerScale){
+  const mode=textSize||"shrink-in";
+  if(mode==="shrink-in"){
+    const f=shrinkInFactors(count, dir, metrics, gap, Rref);
+    return {f, ts:f.slice()};
+  }
+  if(mode==="uniform"){
+    const ts=Array.from({length:count},()=>1);
+    return {f:absoluteFactors(count, dir, metrics, gap, Rref, ts), ts};
+  }
+  // shrink-out / custom: text scale is a linear ramp keyed to each ring's radial
+  // position (0 = innermost, 1 = outermost). We get that ordering from the shrink-in
+  // geometry, set ts per ring, then re-solve the radii against those absolute sizes
+  // so bands still clear. shrink-out is just custom with outer=min, inner=max.
+  const fin=shrinkInFactors(count, dir, metrics, gap, Rref);
+  const lo=Math.min(...fin), hi=Math.max(...fin), span=(hi-lo)||1;
+  let outer, inner;
+  if(mode==="custom"){ outer=outerScale!=null?outerScale:1; inner=innerScale!=null?innerScale:1; }
+  else { outer=lo; inner=hi; } // shrink-out: mirror of shrink-in
+  const ts=fin.map(x=>{ const t=(x-lo)/span; return inner+(outer-inner)*t; });
+  return {f:absoluteFactors(count, dir, metrics, gap, Rref, ts), ts};
+}
+
+/* Rectangle inset offsets (px per edge). Rectangle rings keep one text size (own
+   path `d`, not scaled), so each band clears the next by prev descent + this
+   ascent + gap. Falls back to uniform `spacing` when no metrics are supplied. */
+function rectInsetOffsets(count, dir, spacing, metrics, gap){
+  const offs=[];
+  if(!metrics){
+    for(let i=0;i<count;i++)
+      offs[i]=(dir==="outward"? -i : dir==="inward"? i : i-(count-1)/2)*spacing;
+    return offs;
+  }
+  const cum=[0];
+  for(let i=1;i<count;i++) cum[i]=cum[i-1]+metrics[i-1].desc+metrics[i].asc+gap;
+  if(dir==="inward")       for(let i=0;i<count;i++) offs[i]=cum[i];
+  else if(dir==="outward") for(let i=0;i<count;i++) offs[i]=-cum[i];
+  else { const half=cum[count-1]/2; for(let i=0;i<count;i++) offs[i]=cum[i]-half; }
+  return offs;
+}
+
+/* Concentric contours by scaling around center.
+   opts.metrics (per-ring {asc,desc}) + opts.gap → space rings by real glyph height;
+   omit opts to use the uniform `spacing` (px) fallback. */
+function createConcentricPaths(shapeType, sp, count, spacing, dir, opts){
   const base=createShapePath(shapeType, sp);
   const paths=[];
+  const metrics = opts && opts.metrics;
+  const gap = opts && opts.gap!=null ? opts.gap : 0;
   // Rectangle: a uniform center-scale would make the short sides looser than the
   // long ones (gap scales with each side's length). Inset every ring by a constant
   // amount on all four edges instead, so the spacing is even all the way around.
   // These rings carry their own path `d` and are NOT scaled, so text stays one size.
   if(shapeType==="rectangle"){
     const {x,y,w,h}=base.bbox, cx=base.cx, cy=base.cy;
+    // Per-ring font multiplier ts (rendered size = fontSize*ts). Outermost ring is
+    // i=0 for inward/centered, i=count-1 for outward; sizes ramp inner→outer. Uniform
+    // mode keeps ts=1 (constant text), matching the classic rectangle look.
+    const textSize = (opts && opts.textSize) || "uniform";
+    const outer = opts&&opts.outerScale!=null ? opts.outerScale : 1;
+    const inner = opts&&opts.innerScale!=null ? opts.innerScale : 1;
+    const outerness=i=> count<=1 ? 1 : (dir==="outward" ? i/(count-1) : (count-1-i)/(count-1));
+    const tsArr=Array.from({length:count},(_,i)=> textSize==="custom" ? inner+(outer-inner)*outerness(i) : 1);
+    // Rings are inset by a constant perpendicular amount on all four edges, spaced so
+    // each ring's text band clears the next by its (scaled) descent+ascent+gap. Scale
+    // the metrics by each ring's ts so varied sizes still don't collide.
+    const scaledMetrics = metrics ? metrics.map((m,i)=>({asc:m.asc*tsArr[i], desc:m.desc*tsArr[i]})) : null;
+    const offs=rectInsetOffsets(count, dir, spacing, scaledMetrics, gap);
     for(let i=0;i<count;i++){
-      const off=(dir==="outward"? -i : dir==="inward"? i : i-(count-1)/2)*spacing;
+      const off=offs[i];
       const w2=w-2*off, h2=h-2*off;
       if(w2<=8||h2<=8) break;
       const rx=cx-w2/2, ry=cy-h2/2;
       const d=polyPath([[rx,ry],[rx+w2,ry],[rx+w2,ry+h2],[rx,ry+h2]]);
       const f=Math.min(w2/w,h2/h); // relative size, only used for weight variation
-      paths.push({f, i, d});
+      paths.push({f, i, d, ts:tsArr[i], bbox:{x:rx,y:ry,w:w2,h:h2}});
     }
     return {base, paths};
   }
   const maxDim=Math.max(base.bbox.w,base.bbox.h)/2 || R;
+  const textSize = opts && opts.textSize;
+  let fs, tsArr;
+  if(metrics){
+    const r=metricScaleFactors(count, dir, metrics, gap, maxDim, textSize, opts&&opts.outerScale, opts&&opts.innerScale);
+    fs=r.f; tsArr=r.ts;
+  }else{
+    fs=Array.from({length:count},(_,i)=> dir==="inward" ? 1 - i*spacing/maxDim
+        : dir==="outward" ? 1 + i*spacing/maxDim
+        : 1 + (i-(count-1)/2)*spacing/maxDim);
+    tsArr=fs.slice();
+  }
   for(let i=0;i<count;i++){
-    let f;
-    if(dir==="inward")      f=1 - i*spacing/maxDim;
-    else if(dir==="outward")f=1 + i*spacing/maxDim;
-    else                    f=1 + (i-(count-1)/2)*spacing/maxDim; // centered
-    if(f<=0.04) break;
+    const f=fs[i];
+    if(f==null || f<=0.04) break;
+    // ts = font multiplier vs fontSize for this ring; rendered size = fontSize*ts.
     // rebuild scaled path via transform on the path data is hard; instead scale params-agnostic by wrapping in <g> transform.
-    paths.push({f, i});
+    paths.push({f, ts:tsArr[i], i});
   }
   return {base, paths};
 }
@@ -1686,6 +1878,9 @@ let backgroundImageData="";
 let backgroundImageName="";
 let foregroundImageData="";
 let foregroundImageName="";
+let foregroundOriginalData="";   // pre-cutout source, for undo
+let foregroundIsCutout=false;    // true when bg removed → render with "meet"
+let cutoutAutoBg=false;          // true when cutout auto-filled the background layer
 
 function updateBackgroundImageUi(){
   const name=$("#bgImageName"),remove=$("#removeBgImage"),drop=$("#bgDrop"),thumb=$("#bgImageThumb");
@@ -1696,29 +1891,86 @@ function updateBackgroundImageUi(){
 }
 
 function updateForegroundImageUi(){
-  const name=$("#fgImageName"),remove=$("#removeFgImage"),drop=$("#fgDrop"),thumb=$("#fgImageThumb");
+  const name=$("#fgImageName"),remove=$("#removeFgImage"),drop=$("#fgDrop"),thumb=$("#fgImageThumb"),cut=$("#cutoutFgImage");
   if(name)name.textContent=foregroundImageName||"No image selected";
   if(remove)remove.disabled=!foregroundImageData;
   if(drop)drop.classList.toggle("has-image",!!foregroundImageData);
   if(thumb)thumb.src=foregroundImageData||"";
+  if(cut){
+    cut.disabled=!foregroundImageData;
+    cut.textContent=foregroundIsCutout?"↺ Undo cutout":"✂ Cut out subject";
+  }
 }
 
 function clearBackgroundImage(){
   backgroundImageData="";
   backgroundImageName="";
+  cutoutAutoBg=false;
   const input=$("#bgImageInput");
   if(input)input.value="";
   updateBackgroundImageUi();
   render();
+  saveLocal();
 }
 
 function clearForegroundImage(){
   foregroundImageData="";
   foregroundImageName="";
+  foregroundOriginalData="";
+  foregroundIsCutout=false;
+  if(cutoutAutoBg){ backgroundImageData=""; backgroundImageName=""; cutoutAutoBg=false; updateBackgroundImageUi(); }
   const input=$("#fgImageInput");
   if(input)input.value="";
   updateForegroundImageUi();
   render();
+  saveLocal();
+}
+
+// Remove background from the foreground image so only the subject overlays the
+// pattern. Runs @imgly/background-removal in-browser (WASM+ONNX, model fetched
+// on first use). Toggles: cut out ⇄ restore original.
+async function toggleForegroundCutout(){
+  if(!foregroundImageData)return;
+  const btn=$("#cutoutFgImage");
+  if(foregroundIsCutout){
+    foregroundImageData=foregroundOriginalData||foregroundImageData;
+    foregroundIsCutout=false;
+    if(cutoutAutoBg){ backgroundImageData=""; backgroundImageName=""; cutoutAutoBg=false; updateBackgroundImageUi(); }
+    updateForegroundImageUi(); render(); saveLocal?.();
+    toast("Cutout undone");
+    return;
+  }
+  if(btn){ btn.disabled=true; btn.textContent="Cutting out…"; }
+  toast("Removing background… first run downloads a model","ok");
+  try{
+    const src=foregroundOriginalData||foregroundImageData;
+    const { removeBackground } = await import("https://esm.sh/@imgly/background-removal@1.6.0");
+    const blob = await removeBackground(src);
+    const dataUrl = await new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=()=>res(String(r.result||""));
+      r.onerror=()=>rej(r.error);
+      r.readAsDataURL(blob);
+    });
+    foregroundOriginalData=src;
+    foregroundImageData=dataUrl;
+    foregroundIsCutout=true;
+    // keep the original scene behind the pattern (unless user set their own bg)
+    if(!backgroundImageData){
+      backgroundImageData=src;
+      backgroundImageName=foregroundImageName||"cutout background";
+      cutoutAutoBg=true;
+      updateBackgroundImageUi();
+    }
+    render();
+    saveLocal();
+    toast("Subject cut out","ok");
+  }catch(err){
+    console.error("cutout failed:",err);
+    toast("Cutout failed — check your connection and retry","err");
+  }finally{
+    updateForegroundImageUi();
+  }
 }
 
 function computeFit(bbox){
@@ -1798,7 +2050,9 @@ function buildSVG(forExport){
   if(foregroundImageData){
     const image=el("image",{
       x:0,y:0,width:state.abW,height:state.abH,
-      preserveAspectRatio:"xMidYMid slice"
+      // cutout over its own scene: match bg fit (slice) for pixel-perfect overlap;
+      // standalone cutout: show whole subject uncropped (meet); full photo: cover (slice)
+      preserveAspectRatio:(foregroundIsCutout&&!cutoutAutoBg)?"xMidYMid meet":"xMidYMid slice"
     });
     image.setAttribute("href",foregroundImageData);
     image.setAttributeNS(XLINK,"xlink:href",foregroundImageData);
@@ -1843,8 +2097,11 @@ function renderRadialPattern(g,defs,shape){
   const sp=state.sp;
   const c=state.concentric;
   const nLines=clamp(c.rings,1,10);
-  const gap=(sp.rayLineGap||1.3)*state.fontSize;
   const lineRuns=radialLineUnits();
+  // Line pitch fits the real glyph height (max ink height across all lines so none
+  // collide) plus the slider's extra whitespace — mirrors concentric ring spacing.
+  const lineH=Math.max(...lineRuns.map(r=>{const m=measureRunsVExtent(r);return m.asc+m.desc;}));
+  const gap=lineH + (sp.rayLineGap!=null ? sp.rayLineGap : 6);
   // lines are drawn symmetrically around each ray's centerline, offset perpendicular
   for(let i=0;i<rays;i++){
     const a=deg2rad(-90+i*360/rays);
@@ -1887,13 +2144,38 @@ function ringWeight(f, fMin, fMax, c){
   const w=c.weightStart + (c.weightEnd-c.weightStart)*t;
   return String(snapWeight(clamp(w, 100, 800)));
 }
+/* Per-repeat font weight within one ring: ping-pong lerp weightRepeatStart→End→Start
+   across the repeats so the seam (last repeat meeting first) has no weight jump. */
+function repeatWeight(cyc, maxCyc, c){
+  if(maxCyc<=0) return String(snapWeight(clamp(c.weightRepeatStart,100,800)));
+  const p=cyc/maxCyc;                 // 0..1 around the loop
+  const t=1-Math.abs(2*p-1);          // triangle wave: 0 at seam, 1 at halfway
+  const w=c.weightRepeatStart + (c.weightRepeatEnd-c.weightRepeatStart)*t;
+  return String(snapWeight(clamp(w, 100, 800)));
+}
 function renderConcentricPattern(g, defs, shape){
   const c=state.concentric;
   const ringCount = state.shape==="snail" ? 1 : clamp(c.rings,1,10);
-  const {base, paths}=createConcentricPaths(state.shape, state.sp, ringCount, c.spacing, c.dir);
   // Blank rings fall back to the first ring that has text (the single content box
   // is hidden for ring shapes), or to the hidden editor buffer as a last resort.
   const unit=firstFilledRingRuns()||buildUnitRuns();
+  // Spacing always fits to each ring's real glyph height (bands never collide,
+  // regardless of case/weight/font); the slider adds extra whitespace on top.
+  let opts=null;
+  if(state.shape!=="snail"){
+    const metrics=[];
+    for(let i=0;i<ringCount;i++) metrics.push(measureRunsVExtent(buildRingRuns(i)||unit));
+    // Circle: text size is driven by explicit outer/inner ring font sizes (px). All
+    // other concentric shapes keep the classic shrink-with-radius behavior. metrics
+    // are measured at state.fontSize, so px targets become multipliers px/fontSize.
+    const ref=state.fontSize||1;
+    const varyOn = sizeVaryShape() && c.sizeVary;
+    opts={metrics, gap: c.gap!=null ? c.gap : 6,
+      textSize: varyOn ? "custom" : (sizeVaryShape() ? "uniform" : "shrink-in"),
+      outerScale: (c.outerPx!=null?c.outerPx:40)/ref,
+      innerScale: (c.innerPx!=null?c.innerPx:14)/ref};
+  }
+  const {base, paths}=createConcentricPaths(state.shape, state.sp, ringCount, c.spacing, c.dir, opts);
   const fMin=Math.min(...paths.map(p=>p.f)), fMax=Math.max(...paths.map(p=>p.f));
   paths.forEach((p,idx)=>{
     const ringUnit=buildRingRuns(idx)||unit;
@@ -1905,26 +2187,61 @@ function renderConcentricPattern(g, defs, shape){
     // they use an identity transform; everything else is a scaled copy of the base.
     const ringG=el("g",{transform: p.d ? "translate(0 0)" : `translate(${base.cx} ${base.cy}) scale(${p.f}) translate(${-base.cx} ${-base.cy})`});
     ringG.setAttribute("data-ring",idx);
+    const ringWt = c.weightVary ? ringWeight(p.f, fMin, fMax, c) : state.fontWeight;
+    // Per-ring font size. The ring group is scaled by p.f, so an attr of X renders at
+    // X*p.f. p.ts is the intended font multiplier vs fontSize (rendered = fontSize*ts),
+    // set per textSize mode with matching auto-spacing. Counter the group scale so the
+    // rendered size lands exactly on fontSize*ts. Rings with their own path `d`
+    // (rectangle) aren't group-scaled → use fontSize as-is.
+    let fsize=state.fontSize;
+    if(!p.d && p.f>0 && p.ts!=null) fsize=state.fontSize*p.ts/p.f;
+    // Rectangle: same pinwheel edges as the square, but each ring is pre-insetted at
+    // its own bbox (identity transform, no group scale), so pass the ring bbox and the
+    // ring's absolute size fontSize*ts (per-ring when "vary font size" is on).
+    if(state.shape==="rectangle"){
+      renderSquareRing(ringG, defs, p.bbox||base.bbox, ringUnit, ringWt, idx, state.fontSize*(p.ts!=null?p.ts:1));
+      g.appendChild(ringG);
+      return;
+    }
+    // Square: fill each of the 4 edges corner-to-corner with straight, axis-clipped
+    // bands so the four right-angle corners meet crisply — no gap, no overlap (a
+    // plain textPath around the loop bends at each corner and leaves wedge gaps).
+    if(state.shape==="square"){
+      renderSquareRing(ringG, defs, base.bbox, ringUnit, ringWt, idx, fsize);
+      g.appendChild(ringG);
+      return;
+    }
     const pid=uid("cp");
     let d=p.d||base.outline||base.clip;
     const pe=el("path",{id:pid,d:d,fill:"none"}); defs.appendChild(pe);
     const pathLength=measurePathLen(d);
+    // The path lives in the ring's own (unscaled) coordinate system; glyphs advance
+    // there at the font-size ATTR (fontSize*ts/f), while measureRuns measures at base
+    // fontSize. So the length to fill, in base-font units, is pathLength*(f/ts). With
+    // shrink-in (ts=f) this is a no-op; uniform/shrink-out need it or the loop under-
+    // or over-fills (e.g. shrink-out's outer ring stopping short of closing).
+    const fillScale = (!p.d && p.ts) ? p.f/p.ts : 1;
+    const fillLen = pathLength*fillScale;
     let runs, startOffset=0;
     // Alternate stagger: shift odd rings by half a content repeat. Applied NEGATIVE
     // so the start seam moves off the path head — textPath draws forward-only, so a
     // positive shift would leave the [0, shift) arc empty (a gap) and clip the tail.
     // Negative shift + overfilling the run length keeps the closed loop fully covered.
     let shiftPct=0;
-    if(pathLength>0 && alt){
+    if(fillLen>0 && alt){
       const unitLen=measureRuns(ringUnit);
-      shiftPct = (((unitLen/pathLength)*50 % 100) + 100) % 100;
+      shiftPct = (((unitLen/fillLen)*50 % 100) + 100) % 100;
     }
     // overfill by the shift so the negative start still covers the whole loop
-    runs=repeatRunsToLength(ringUnit,pathLength*(1+shiftPct/100),true);
+    runs=repeatRunsToLength(ringUnit,fillLen*(1+shiftPct/100),true);
     startOffset -= shiftPct;
-    const ringWt = c.weightVary ? ringWeight(p.f, fMin, fMax, c) : state.fontWeight;
+    // Per-repeat weight: tag each run with the weight for its repeat index (_cycle).
+    if(c.weightRepeatVary){
+      let maxCyc=0; for(const r of runs) if((r._cycle||0)>maxCyc) maxCyc=r._cycle;
+      for(const r of runs) r._weight=repeatWeight(r._cycle||0, maxCyc, c);
+    }
     const text=el("text",{
-      "font-family":state.fontFamily,"font-size":state.fontSize,
+      "font-family":state.fontFamily,"font-size":fsize,
       "font-weight":ringWt, fill: ringColor(idx)
     });
     if(state.italic)text.setAttribute("font-style","italic");
@@ -1939,6 +2256,128 @@ function renderConcentricPattern(g, defs, shape){
     g.appendChild(ringG);
   });
 }
+/* One concentric square ring, drawn edge-by-edge so the four right-angle corners
+   are crisp. A plain textPath around a closed square bends the baseline 90° at each
+   vertex, which leaves a wedge gap on the outside of every corner and overlaps on
+   the inside. Instead we run text as ONE continuous ribbon across the 4 edges (CW,
+   so the top reads left→right like the old path), fill each edge corner-to-corner,
+   and clip every edge to an axis-aligned band. At each corner the horizontal edge
+   wins — it runs the full width and its band covers the corner — while the vertical
+   edge is pulled IN by one band height at both ends so the two never gap or overlap.
+   Runs inside the ring's scale <g>, so bands scale with the ring. */
+function renderSquareRing(ringG, defs, bbox, ringUnit, weight, idx, fsize){
+  // fsize = per-ring effective size (counters the group scale). Edges live in base
+  // coords and the group scales them by the same factor, so measuring tokens and
+  // bands at fsize keeps every edge filled and the band matching the rendered ink.
+  const fs=Math.max(1, fsize!=null?fsize:state.fontSize);
+  const Lx=bbox.x, Rx=bbox.x+bbox.w, Ty=bbox.y, By=bbox.y+bbox.h;
+  // split into single chars (carrying run style) so an edge fills completely —
+  // words break across corners rather than leaving a gap (same as pyramid).
+  const toks=[];
+  for(const r of (ringUnit||[])) for(const ch of [...r.text]) toks.push({...r,text:ch});
+  if(!toks.length) return;
+  const sameStyle=(a,b)=>a.color===b.color&&a.bold===b.bold&&a.italic===b.italic
+    &&a.underline===b.underline&&a.strike===b.strike&&a.size===b.size
+    &&a.family===b.family&&a.letter===b.letter;
+  const mergeRuns=cs=>{const out=[];for(const c of cs){const last=out[out.length-1];
+    if(last&&sameStyle(last,c)&&!c._gapBefore)last.text+=c.text; else out.push({...c});}return out;};
+  const gap=contentGap();   // Repeat-spacing slider: extra whitespace between repeats.
+  const asc=(()=>{
+    _measCtx.font=`${state.italic?"italic":"normal"} ${weight} ${fs}px ${state.fontFamily}`;
+    const m=_measCtx.measureText("Hxdlbf");
+    return m.actualBoundingBoxAscent||m.fontBoundingBoxAscent||fs*0.72;
+  })();
+  const padL=asc*1.06, padR=fs*0.3;                 // ink height (outward) + descender margin (inward)
+  // Edges clockwise starting on the LEFT (left→top→right→bottom). Draw order matters:
+  // each edge's overhang tail is drawn under the next edge, so starting on the left
+  // sets where the pinwheel's rotation reads from.
+  const edges=[
+    {a:[Lx,By], b:[Lx,Ty], horiz:false},  // left  (bottom→top)
+    {a:[Lx,Ty], b:[Rx,Ty], horiz:true},   // top   (left→right)
+    {a:[Rx,Ty], b:[Rx,By], horiz:false},  // right (top→bottom)
+    {a:[Rx,By], b:[Lx,By], horiz:true},   // bottom(right→left)
+  ];
+  // Measure at the RING weight, not state.fontWeight. pyrTokenWidth uses the global
+  // weight, so a thin ring (e.g. 100) gets over-measured (fewer tokens → text stops
+  // short of the corner) and a bold ring over-fills. Weighing tokens by the weight
+  // they actually render at makes every ring fill edge-to-edge identically.
+  const tokW=t=>{
+    const st=(t.italic||state.italic)?"italic":"normal";
+    const wt=t.bold?"700":weight;
+    _measCtx.font=`${st} ${wt} ${fs}px ${t.family||state.fontFamily}`;
+    return _measCtx.measureText(t.text).width + (t.letter||0)*t.text.length + (t._gapBefore||0);
+  };
+  let steps=0; const guard=toks.length*4+edges.length*400;
+  for(const e of edges){
+    // Restart the token stream at each edge so all four sides read identically from
+    // their start corner (equal length + equal content), instead of one ribbon
+    // continuing across corners.
+    let ci=0;
+    const dx=e.b[0]-e.a[0], dy=e.b[1]-e.a[1];
+    const len=Math.hypot(dx,dy); if(len<1) continue;
+    const ux=dx/len, uy=dy/len;
+    const nx=uy, ny=-ux;                            // ink normal (left of travel = outward)
+    // Clockwise pinwheel: every edge is extended by the ink thickness (padL) BACK past
+    // its START corner and flush at its END corner. All four edges are the SAME length
+    // (side + padL) regardless of horizontal vs vertical. The overhang lands at the
+    // corner the edge leads OUT of, so on the left-start order the horizontal owns the
+    // top-left corner (the vertical butts flush into it instead of sticking past).
+    const ax=e.a[0]-ux*padL, ay=e.a[1]-uy*padL;
+    const bx=e.b[0], by=e.b[1];
+    const segLen=len+padL; if(segLen<1) continue;
+    // pull tokens until the edge is full — include the token crossing the far end
+    // so there is no trailing gap (the clip band trims the overflow).
+    const chosen=[]; let w=0;
+    while(steps<guard){
+      const iu=ci%toks.length;
+      // Repeat boundary (cycle index wraps to 0): always emit a separator SPACE so
+      // repeats never butt together ("Playground DEICHTOR", not "PlaygroundDEICHTOR"),
+      // then stack the offset slider on top as extra dx — mirrors ring spacing (a
+      // default fit plus the slider). Skipped before the very first token of the edge.
+      if(chosen.length && iu===0){
+        const sep={...toks[0], text:" "};
+        if(gap) sep._gapBefore=gap;
+        chosen.push(sep); w+=tokW(sep);
+      }
+      const t={...toks[iu]};
+      if(!chosen.length && !t.text.trim()){ ci++; steps++; continue; } // drop leading space
+      chosen.push(t); w+=tokW(t); ci++; steps++;
+      // Overfill past the band: the textPath is exactly segLen long, so glyphs beyond
+      // it are dropped by the renderer — overshooting guarantees the ribbon reaches the
+      // far corner regardless of measure rounding, instead of stopping a glyph short.
+      if(w>=segLen+padL) break;
+    }
+    if(!chosen.length) continue;
+    const pid=uid("sq");
+    defs.appendChild(el("path",{id:pid,d:`M ${ax.toFixed(2)} ${ay.toFixed(2)} L ${bx.toFixed(2)} ${by.toFixed(2)}`,fill:"none"}));
+    const band=[
+      [ax+padL*nx, ay+padL*ny],
+      [bx+padL*nx, by+padL*ny],
+      [bx-padR*nx, by-padR*ny],
+      [ax-padR*nx, ay-padR*ny],
+    ];
+    const clid=uid("sqc");
+    const cp=el("clipPath",{id:clid});
+    cp.appendChild(el("polygon",{points:band.map(p=>`${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(" ")}));
+    defs.appendChild(cp);
+    const text=el("text",{
+      "font-family":state.fontFamily,"font-size":fs,"font-weight":weight,fill:ringColor(idx)
+    });
+    text.setAttribute("clip-path",`url(#${clid})`);
+    // Preserve whitespace so the rendered advance matches what tokW measured; without
+    // this SVG collapses the "HALLEN  Pattern" double-space, shrinking the ribbon so it
+    // stops short of the corner (a variable, per-edge gap).
+    text.setAttribute("xml:space","preserve");
+    if(state.italic)text.setAttribute("font-style","italic");
+    const tp=el("textPath");
+    tp.setAttributeNS(XLINK,"xlink:href","#"+pid);
+    tp.setAttribute("href","#"+pid);
+    tp.setAttribute("startOffset","0%");
+    runsToTspansConcentric(mergeRuns(chosen), tp, idx, weight);
+    text.appendChild(tp);
+    ringG.appendChild(text);
+  }
+}
 /* ----- PYRAMID MODE ----- */
 /* Sharp 90° stepped ridge. Text flows CONTINUOUSLY edge to edge: the size comes
    straight from the font-size slider, and each edge is filled vertex-to-vertex
@@ -1952,17 +2391,22 @@ function pyrTokenWidth(t,size){
 }
 function renderPyramidPattern(g, defs, shape){
   const pts=shape.extra.points||[];
-  const unit=buildUnitRuns();  // pyramid uses one content stream (main editor), no rings
-  if(!unit.length || pts.length<2) return;
+  if(pts.length<2) return;
   const sp=state.sp;
   const fontSize=Math.max(1, state.fontSize);
-  // split content into single characters (carrying run styling) so a line can be
-  // filled completely — words break across edges rather than leaving a gap.
-  const toks=[];
-  for(const r of unit){
-    for(const ch of [...r.text]) toks.push({...r,text:ch});
-  }
-  if(!toks.length) return;
+  // Edges alternate text like rings: each edge pulls from a per-edge field, cycling
+  // field 1 → edge 1, field 2 → edge 2, … and wrapping. A blank field inherits the
+  // first filled field, then the main editor. Chars carry their run styling and are
+  // split so an edge fills completely — words break across edges rather than gap.
+  const count=clamp(state.concentric.rings||1,1,10);
+  const fallback=firstFilledRingRuns()||buildUnitRuns();
+  if(!fallback.length) return;
+  const runsForEdge=ei=>{ const r=buildRingRuns(ei%count); return (r&&r.length)?r:fallback; };
+  const toksOf=unit=>{
+    const out=[];
+    for(const r of unit){ for(const ch of [...r.text]) out.push({...r,text:ch}); }
+    return out;
+  };
   // merge adjacent same-style chars back into runs (fewer tspans, keeps colors)
   const sameStyle=(a,b)=>a.color===b.color&&a.bold===b.bold&&a.italic===b.italic
     &&a.underline===b.underline&&a.strike===b.strike&&a.size===b.size
@@ -1971,11 +2415,12 @@ function renderPyramidPattern(g, defs, shape){
     const out=[];
     for(const c of cs){
       const last=out[out.length-1];
-      if(last && sameStyle(last,c)) last.text+=c.text;
+      if(last && sameStyle(last,c) && !c._gapBefore) last.text+=c.text;
       else out.push({...c});
     }
     return out;
   };
+  const gap=contentGap();   // Repeat-spacing slider: extra whitespace between repeats.
   // edges of the ridge
   const edges=[];
   for(let i=0;i<pts.length-1;i++){
@@ -2003,56 +2448,66 @@ function renderPyramidPattern(g, defs, shape){
   const leftN=e=>[e.dy/e.len, -e.dx/e.len];          // unit normal, left of travel
   const isHoriz=e=>Math.abs(e.dx)>Math.abs(e.dy);    // tread vs riser
   const concaveAt=(inDir,outDir)=>inDir[0]*outDir[1]-inDir[1]*outDir[0]<0;
-  // Axis-aligned clip band for edge ei. Treads extend a hair past each vertex so
-  // they cover the corner; risers are pulled IN by the tread band height (padL)
-  // at concave ends, chopping them on a straight line clear of the tread.
-  const bandPoly=ei=>{
-    const e=edges[ei], horiz=isHoriz(e);
-    const u=[e.dx/e.len, e.dy/e.len], L=leftN(e);
-    const dir=x=>[x.dx/x.len, x.dy/x.len];
-    // signed pull inward along +u at start (A) / end (B): + shortens, - extends.
-    // Treads reach further left (their start) so they sit closer to the riser.
-    let pullA=horiz?-padL:0, pullB=horiz?-padR:0;
-    if(!horiz){
-      if(ei>0     && concaveAt(dir(edges[ei-1]), u))            pullA=padL;
-      if(ei<edges.length-1 && concaveAt(u, dir(edges[ei+1])))   pullB=padL;
-    }
-    const A=[e.a[0]+u[0]*pullA, e.a[1]+u[1]*pullA];
-    const B=[e.b[0]-u[0]*pullB, e.b[1]-u[1]*pullB];
+  // Axis-aligned clip band for one edge's drawn span P0→P1 (already chopped/extended
+  // at the corners). Left of travel = glyph ascent (padL), right = descenders (padR).
+  const bandPoly=(ei, P0, P1)=>{
+    const L=leftN(edges[ei]);
     return [
-      [A[0]+padL*L[0], A[1]+padL*L[1]],
-      [B[0]+padL*L[0], B[1]+padL*L[1]],
-      [B[0]-padR*L[0], B[1]-padR*L[1]],
-      [A[0]-padR*L[0], A[1]-padR*L[1]],
+      [P0[0]+padL*L[0], P0[1]+padL*L[1]],
+      [P1[0]+padL*L[0], P1[1]+padL*L[1]],
+      [P1[0]-padR*L[0], P1[1]-padR*L[1]],
+      [P0[0]-padR*L[0], P0[1]-padR*L[1]],
     ];
   };
-  let ci=0;                                          // running cursor over the repeating token stream
   const guard=edges.length*400;                      // stop runaway loops
   let steps=0;
   for(let ei=0; ei<edges.length; ei++){
     const e=edges[ei];
-    // Treads start a band-height early (to the left) so their text sits right up
-    // against the riser instead of leaving a sliver of gap; the clip band widens
-    // to match (see bandPoly's pullA).
+    const toks=toksOf(runsForEdge(ei));               // this edge's alternating text
+    if(!toks.length) continue;
     const ux=e.dx/e.len, uy=e.dy/e.len;
-    const startExt=isHoriz(e)?padL*0.45:0;
-    const inner=e.len+startExt;
-    const ax=e.a[0]-ux*startExt, ay=e.a[1]-uy*startExt;
-    const bx=e.b[0], by=e.b[1];
-    // pull characters until the edge is full — include the token that crosses
-    // the far corner so there is no trailing gap (the clip trims its overflow)
-    const chosen=[]; let w=0;
+    const uPrev = ei>0 ? [edges[ei-1].dx/edges[ei-1].len, edges[ei-1].dy/edges[ei-1].len] : null;
+    const uNext = ei<edges.length-1 ? [edges[ei+1].dx/edges[ei+1].len, edges[ei+1].dy/edges[ei+1].len] : null;
+    const ax=e.a[0], ay=e.a[1];
+    // Corner handling — every corner joins a tread (horizontal) with a riser (vertical).
+    // The tread always wins the corner square; the riser adapts at each end that meets
+    // a tread. SVG textPath only draws glyphs that lie ON the path, so we resize the
+    // riser's DRAWN span (path + fill + clip together), not just the clip:
+    //   • CONCAVE (inner) corner → pull the riser IN by padL so it stops before the row
+    //     the tread owns → no overlap (the tread's perpendicular jut covers the square).
+    //   • CONVEX (outer) corner → push the riser OUT by padL past the vertex so its own
+    //     jut fills the outer corner square that neither edge would otherwise reach → no gap.
+    // Treads keep their exact segment; the riser's give-and-take closes every corner.
+    let sDist=0, eDist=e.len;                         // drawn span along the edge, from A
+    if(!isHoriz(e)){
+      if(uPrev && isHoriz(edges[ei-1])) sDist = concaveAt(uPrev,[ux,uy]) ?  padL : -padL;
+      if(uNext && isHoriz(edges[ei+1])) eDist = e.len + (concaveAt([ux,uy],uNext) ? -padL : padL);
+    }
+    const inner=eDist-sDist;                          // length of text to lay down
+    const P0=[ax+ux*sDist, ay+uy*sDist];
+    const P1=[ax+ux*eDist, ay+uy*eDist];
+    // pull characters until the drawn span is full — include the token that crosses
+    // the far end so there is no trailing gap (the clip trims its overflow)
+    const chosen=[]; let w=0, ci=0;                  // each edge starts its own text fresh
     while(steps<guard){
-      const t=toks[ci%toks.length];
-      const tw=pyrTokenWidth(t,fontSize);
+      const iu=ci%toks.length;
+      // Repeat boundary (cycle wraps to 0): always emit a separator SPACE so repeats
+      // never butt together, then stack the offset slider on top as extra dx. Skipped
+      // at the edge start so text still begins flush at the vertex.
+      if(chosen.length && iu===0){
+        const sep={...toks[0], text:" "};
+        if(gap) sep._gapBefore=gap;
+        chosen.push(sep); w+=pyrTokenWidth(sep,fontSize)+(gap||0);
+      }
+      const t={...toks[iu]};
       if(!chosen.length && !t.text.trim()){ ci++; steps++; continue; } // drop leading space
-      chosen.push(t); w+=tw; ci++; steps++;
-      if(w>=inner) break;                            // filled past the corner → clip cuts the rest
+      chosen.push(t); w+=pyrTokenWidth(t,fontSize); ci++; steps++;
+      if(w>=inner) break;                            // filled past the end → clip cuts the rest
     }
     if(!chosen.length) continue;
     const pid=uid("py");
-    defs.appendChild(el("path",{id:pid,d:`M ${ax.toFixed(2)} ${ay.toFixed(2)} L ${bx.toFixed(2)} ${by.toFixed(2)}`,fill:"none"}));
-    const band=bandPoly(ei);
+    defs.appendChild(el("path",{id:pid,d:`M ${P0[0].toFixed(2)} ${P0[1].toFixed(2)} L ${P1[0].toFixed(2)} ${P1[1].toFixed(2)}`,fill:"none"}));
+    const band=bandPoly(ei,P0,P1);
     const clid=uid("pyc");
     const cp=el("clipPath",{id:clid});
     cp.appendChild(el("polygon",{points:band.map(p=>`${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(" ")}));
@@ -2062,12 +2517,15 @@ function renderPyramidPattern(g, defs, shape){
       "font-weight":state.fontWeight, fill:state.textColor
     });
     text.setAttribute("clip-path",`url(#${clid})`);
+    // Preserve whitespace so the rendered advance matches what pyrTokenWidth measured;
+    // otherwise SVG collapses double-spaces and the ribbon stops short of the corner.
+    text.setAttribute("xml:space","preserve");
     if(state.italic)text.setAttribute("font-style","italic");
     const tp=el("textPath");
     tp.setAttributeNS(XLINK,"xlink:href","#"+pid);
     tp.setAttribute("href","#"+pid);
     tp.setAttribute("startOffset","0%");             // start at the vertex → continuous flow
-    runsToTspansConcentric(mergeRuns(chosen), tp, 0, state.fontWeight);
+    runsToTspansConcentric(mergeRuns(chosen), tp, ei, state.fontWeight);  // alt-color cycles per edge
     text.appendChild(tp);
     g.appendChild(text);
   }
@@ -2081,8 +2539,10 @@ function runsToTspansConcentric(runs, parent, ringIdx, ringWeight){
   for(const r of runs){
     const t=el("tspan"); t.textContent=r.text;
     if(r._gapBefore) t.setAttribute("dx",r._gapBefore);
-    const weight=r.bold?"700":baseWeight;
-    if(weight!=="400")t.setAttribute("font-weight",weight);
+    const weight=r.bold?"700":(r._weight||baseWeight);
+    // Emit explicitly when a per-repeat weight is set (the <text> base may be a non-400
+    // ring weight, so skipping "400" would wrongly inherit that thicker face).
+    if(weight!=="400"||r._weight)t.setAttribute("font-weight",weight);
     if(r.italic||state.italic)t.setAttribute("font-style","italic");
     { const deco=[]; if(r.underline||state.underline)deco.push("underline"); if(r.strike)deco.push("line-through");
       if(deco.length)t.setAttribute("text-decoration",deco.join(" ")); }
@@ -2143,11 +2603,25 @@ function applyView(){
 }
 function fitView(){
   const wrap=$("#stage-wrap");
-  const ww=wrap.clientWidth-40, wh=wrap.clientHeight-40;
-  const z=Math.min(ww/state.abW, wh/state.abH);
+  const W=wrap.clientWidth, H=wrap.clientHeight, pad=40;
+  // Sidebars float (position:fixed) over the full-bleed canvas, so fit the pattern
+  // into the horizontal band BETWEEN them — not the whole viewport.
+  let left=0, right=W;
+  if(!document.body.classList.contains("hide-sidepanels")){
+    // Use offsetLeft/offsetWidth (transform-agnostic) so the fit targets each
+    // sidebar's FINAL layout slot — even while it's still sliding in during the
+    // intro. Reading getBoundingClientRect mid-transition would fit full-width
+    // then jump to the band once the panels land.
+    const l=$("#left"), r=$("#right");
+    if(l && l.offsetWidth) left=Math.max(left, l.offsetLeft+l.offsetWidth);
+    if(r && r.offsetWidth) right=Math.min(right, r.offsetLeft);
+  }
+  if(right-left < 80){ left=0; right=W; } // sidebars overlap: fall back to full width
+  const availW=Math.max(50,(right-left)-pad*2), availH=Math.max(50,H-pad*2);
+  const z=Math.min(availW/state.abW, availH/state.abH);
   view.zoom=clamp(z,0.05,4);
-  view.x=(wrap.clientWidth-state.abW*view.zoom)/2;
-  view.y=(wrap.clientHeight-state.abH*view.zoom)/2;
+  view.x=left+((right-left)-state.abW*view.zoom)/2;
+  view.y=(H-state.abH*view.zoom)/2;
   applyView();
 }
 function syncPanelsToggle(){
@@ -2294,6 +2768,22 @@ function checkField(label,checked,onChange){
   $("input",w).addEventListener("change",e=>{onChange(e.target.checked);render();saveLocal();});
   return w;
 }
+/* A checkbox with an optional right-aligned "⇅ swap" link on the same row. onSwap
+   is null to omit the link (e.g. when the toggle is off). Keeps the field rhythm. */
+function checkSwapRow(checkEl, onSwap){
+  const row=document.createElement("div");
+  row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px";
+  checkEl.style.marginBottom="0";
+  row.appendChild(checkEl);
+  if(onSwap){
+    const swap=document.createElement("button");
+    swap.type="button"; swap.className="mini-reset"; swap.textContent="⇅ swap";
+    swap.title="Swap the two values.";
+    swap.addEventListener("click",onSwap);
+    row.appendChild(swap);
+  }
+  return row;
+}
 function selectField(label,opts,val,onChange){
   const w=document.createElement("div"); w.className="field";
   const sid=uid("sel");
@@ -2331,7 +2821,7 @@ function buildRichEditors(group, count, labelPrefix){
 }
 /* Per-ring (concentric) and per-line (sun) editors live inside the Content section
    and REPLACE the single text box when active. */
-function ringEditorsActive(){ return state.shape!=="sun" && state.shape!=="pyramid"; }
+function ringEditorsActive(){ return state.shape!=="sun"; }
 function rayLineEditorsActive(){ return state.shape==="sun"; }
 /* Show the single text box unless per-ring/per-line editors have taken over. */
 function updateContentLayout(){
@@ -2357,7 +2847,7 @@ function syncRichEditors(host, active, prefix){
   updateInheritedHints(host);
 }
 function refreshRingEditors(){
-  syncRichEditors($("#ringEditors"), ringEditorsActive(), "Ring");
+  syncRichEditors($("#ringEditors"), ringEditorsActive(), state.shape==="pyramid"?"Edge":"Ring");
   updateContentLayout();
 }
 function refreshRayLineEditors(){
@@ -2386,7 +2876,7 @@ function buildShapeControls(){
   if(t==="sun"){
     add(sliderField("Rays","teeth",4,40,1,sp.teeth,v=>sp.teeth=v));
     add(sliderField("Ray start offset (%)","rayStart",0,80,1,sp.rayStart,v=>sp.rayStart=v));
-    add(sliderField("Line spacing","rayLineGap",0.6,3,0.05,sp.rayLineGap||1.3,v=>sp.rayLineGap=v));
+    add(sliderField("Line spacing","rayLineGap",0,80,1,sp.rayLineGap!=null?sp.rayLineGap:6,v=>sp.rayLineGap=v));
     // "Lines per ray" + "Vary weight per line" live in the left Text panel,
     // next to the per-line editors they drive (see buildPatternControls sun branch).
   }
@@ -2395,15 +2885,9 @@ function buildShapeControls(){
   }
   if(t==="rosette") add(sliderField("Petals","points",4,20,1,sp.points,v=>sp.points=v));
   if(t==="snail"){
+    // Snail turn spacing always auto-derives from font size (see createShapePath), so
+    // it exposes only Turns — no auto-spacing toggle, no manual spacing slider.
     add(sliderField("Turns","spiralTurns",1,10,1,sp.spiralTurns,v=>sp.spiralTurns=v));
-    add(checkField("Auto spacing from font size",sp.spiralAutoSpacing,v=>{sp.spiralAutoSpacing=v;syncAutoSpacing();buildShapeControls();}));
-    const spacingField=sliderField("Spacing","spiralSpacing",10,80,1,sp.spiralSpacing,v=>sp.spiralSpacing=v);
-    if(sp.spiralAutoSpacing){
-      $$("input",spacingField).forEach(inp=>{inp.disabled=true;});
-      spacingField.style.opacity=".5";
-      spacingField.title="Controlled by font size. Uncheck auto spacing to set manually.";
-    }
-    add(spacingField);
   }
   refreshRayLineEditors();
   const grp=$("#shapeCtlGroup");
@@ -2413,7 +2897,37 @@ function buildShapeControls(){
 /* ============================================================
    PATTERN CONTROLS (mode-dependent)
    ============================================================ */
+/* Shapes whose rings are geometrically scaled (circle, square) can vary font size
+   across rings. Other shapes always use the single Font size slider. */
+function sizeVaryShape(){ return state.shape==="circle" || state.shape==="square" || state.shape==="rectangle"; }
+/* With "Vary font size per ring" OFF, the single Font size slider applies uniformly.
+   ON: it's hidden and two sliders (outer/inner ring px) appear — middle rings
+   interpolate linearly between them. */
+function syncSizeControls(){
+  const ff=$("#fontSizeField"), cc=$("#circleSizeControl");
+  if(!ff||!cc) return;
+  cc.innerHTML="";
+  if(!sizeVaryShape()){ ff.hidden=false; cc.hidden=true; return; }
+  const c=state.concentric;
+  const vary=!!c.sizeVary;
+  const chk=checkField("Vary font size per ring",vary,v=>{c.sizeVary=v;syncSizeControls();});
+  cc.appendChild(checkSwapRow(chk, vary ? ()=>{
+    const o=c.outerPx!=null?c.outerPx:40, i=c.innerPx!=null?c.innerPx:14;
+    c.outerPx=i; c.innerPx=o;
+    syncSizeControls(); render(); saveLocal();
+  } : null));
+  if(vary){
+    const os=sliderField("Outer ring font size","outerPx",4,160,1,c.outerPx!=null?c.outerPx:40,v=>c.outerPx=v);
+    os.title="Font size of the outermost ring.";
+    const is=sliderField("Inner ring font size","innerPx",4,160,1,c.innerPx!=null?c.innerPx:14,v=>c.innerPx=v);
+    is.title="Font size of the innermost ring; sizes ramp linearly between the two.";
+    cc.appendChild(os); cc.appendChild(is);
+  }
+  ff.hidden=vary;   // hide the single slider only while varying
+  cc.hidden=false;
+}
 function buildPatternControls(){
+  syncSizeControls();
   const box=$("#patternControls"); box.innerHTML="";
   const ringCount=$("#ringCountControl"); if(ringCount) ringCount.innerHTML="";
   const ringWeight=$("#ringWeightControl"); if(ringWeight) ringWeight.innerHTML="";
@@ -2449,7 +2963,13 @@ function buildPatternControls(){
   }
   if(state.shape==="pyramid"){
     box.appendChild(insetField());
-    box.insertAdjacentHTML("beforeend",`<div class="hint">Text climbs the stepped pyramid to the apex and back down. Use Steps per side in Shape Controls.</div>`);
+    const c=state.concentric;
+    // Edges cycle through the per-edge text fields (field 1 → edge 1, field 2 → edge 2,
+    // … wrapping around), so the pyramid alternates text edge to edge like rings do.
+    const edgesField=sliderField("Alternating texts","rings",1,10,1,c.rings,v=>c.rings=v);
+    if(ringCount) ringCount.appendChild(edgesField); else box.appendChild(edgesField);
+    $$("input",edgesField).forEach(inp=>inp.addEventListener("input",refreshRingEditors));
+    box.insertAdjacentHTML("beforeend",`<div class="hint">Each field fills one edge; the pyramid's edges cycle through the fields. Use Steps per side in Shape Controls.</div>`);
     return;
   }
   const add=e=>box.appendChild(e);
@@ -2459,23 +2979,35 @@ function buildPatternControls(){
   // Rings count lives in the left Text panel, next to the per-ring editors it drives.
   const ringsField=sliderField("Rings","rings",1,10,1,c.rings,v=>c.rings=v);
   if(ringCount) ringCount.appendChild(ringsField); else add(ringsField);
-  add(checkField("Auto spacing from font size",c.autoSpacing,v=>{c.autoSpacing=v;syncAutoSpacing();buildPatternControls();}));
-  const spacingField=sliderField("Spacing between rings","spacing",8,120,1,c.spacing,v=>c.spacing=v);
-  if(c.autoSpacing){
-    $$("input",spacingField).forEach(inp=>{inp.disabled=true;});
-    spacingField.style.opacity=".5";
-    spacingField.title="Controlled by font size. Uncheck auto spacing to set manually.";
-  }
-  add(spacingField);
+  // Rings auto-fit to real glyph height; this slider adds whitespace on top of it.
+  const gapField=sliderField("Spacing between rings","gap",0,80,1,c.gap!=null?c.gap:6,v=>c.gap=v);
+  gapField.title="Extra whitespace between rings, added on top of the measured text height.";
+  add(gapField);
   add(selectField("Expansion",[["inward","Inward"],["outward","Outward"],["centered","Centered"]],c.dir,v=>c.dir=v));
+  // Circle: per-ring text size comes from the Outer/Inner ring font-size sliders in
+  // the Text panel (they replace the single Font size slider). See syncSizeControls.
   add(checkField("Stagger alternate rings (offset seam)",c.alternate,v=>c.alternate=v));
   // Per-ring weight controls live in the left Text panel (concentric only).
   const addWeight = ringWeight ? (e=>ringWeight.appendChild(e)) : add;
   if(ringWeightGroup) ringWeightGroup.hidden=false;
-  addWeight(checkField("Vary weight per ring",c.weightVary,v=>{c.weightVary=v;buildPatternControls();}));
+  // Per-ring and per-repeat weight are mutually exclusive — enabling one clears the
+  // other (both would fight over the same glyph weights).
+  addWeight(checkSwapRow(
+    checkField("Vary weight per ring",c.weightVary,v=>{c.weightVary=v; if(v)c.weightRepeatVary=false; buildPatternControls();}),
+    c.weightVary ? ()=>{ const s=c.weightStart; c.weightStart=c.weightEnd; c.weightEnd=s; buildPatternControls(); render(); saveLocal(); } : null
+  ));
   if(c.weightVary){
     addWeight(weightField("Inner ring weight",c.weightStart,v=>c.weightStart=v));
     addWeight(weightField("Outer ring weight",c.weightEnd,v=>c.weightEnd=v));
+  }
+  // Per-repeat weight: cycles thickness across the repeats within each ring (seam-safe ping-pong).
+  addWeight(checkSwapRow(
+    checkField("Vary weight per repeat",c.weightRepeatVary,v=>{c.weightRepeatVary=v; if(v)c.weightVary=false; buildPatternControls();}),
+    c.weightRepeatVary ? ()=>{ const s=c.weightRepeatStart; c.weightRepeatStart=c.weightRepeatEnd; c.weightRepeatEnd=s; buildPatternControls(); render(); saveLocal(); } : null
+  ));
+  if(c.weightRepeatVary){
+    addWeight(weightField("Seam repeat weight",c.weightRepeatStart,v=>c.weightRepeatStart=v));
+    addWeight(weightField("Mid repeat weight",c.weightRepeatEnd,v=>c.weightRepeatEnd=v));
   }
   // Rings slider (now in the left Text panel) resyncs the per-ring editors on commit.
   $$("input",ringsField).forEach(inp=>inp.addEventListener("input",refreshRingEditors));
@@ -2540,11 +3072,32 @@ function loadUiTheme(){
   applyUiTheme(theme);
 }
 
+let imgSaveWarned=false;
 function saveLocal(){
   if(!lsAvailable)return;
+  const base={state, content:$("#editor").innerHTML, view};
+  // Persist layer images too. Dedup: cutout carries the original upload in
+  // fgOrig; the plain foreground and the auto-background both equal fgOrig, so
+  // store them empty and rebuild on load.
+  const fgOrig=foregroundOriginalData||"";
+  const images={
+    fgOrig,
+    fg:(foregroundImageData&&foregroundImageData!==fgOrig)?foregroundImageData:"",
+    fgName:foregroundImageName||"",
+    fgCut:foregroundIsCutout,
+    bg:(backgroundImageData&&!cutoutAutoBg)?backgroundImageData:"",
+    bgName:backgroundImageName||"",
+    autoBg:cutoutAutoBg
+  };
   try{
-    localStorage.setItem(LS_KEY, JSON.stringify({state, content:$("#editor").innerHTML, view}));
-  }catch(e){}
+    localStorage.setItem(LS_KEY, JSON.stringify({...base, images}));
+  }catch(e){
+    // Data-URL images can exceed the ~5 MB localStorage quota — keep settings.
+    try{
+      localStorage.setItem(LS_KEY, JSON.stringify(base));
+      if(!imgSaveWarned&&(fgOrig||images.fg||images.bg)){ imgSaveWarned=true; toast("Images too large to save — settings kept","err"); }
+    }catch(_){}
+  }
 }
 function loadLocal(){
   if(!lsAvailable)return false;
@@ -2558,9 +3111,20 @@ function loadLocal(){
       state.concentric=Object.assign({},DEFAULT_STATE.concentric,o.state.concentric||{});
       state.anim=Object.assign({},DEFAULT_STATE.anim,o.state.anim||{});
       state.anim.motions=Object.assign({},DEFAULT_STATE.anim.motions,(o.state.anim||{}).motions||{});
+      state.anim.audio=Object.assign({},DEFAULT_STATE.anim.audio,(o.state.anim||{}).audio||{});
       normalizeStateShape();
     }
     if(o.content!=null) $("#editor").innerHTML=o.content;
+    if(o.images){
+      const im=o.images, fgOrig=im.fgOrig||"";
+      foregroundOriginalData=fgOrig;
+      foregroundIsCutout=!!im.fgCut;
+      cutoutAutoBg=!!im.autoBg;
+      foregroundImageData=im.fg||fgOrig||"";
+      foregroundImageName=im.fgName||"";
+      backgroundImageData=im.bg||(cutoutAutoBg?fgOrig:"")||"";
+      backgroundImageName=im.bgName||"";
+    }
     return true;
   }catch(e){ return false; }
 }
@@ -2574,17 +3138,23 @@ function normalizeStateShape(){
   if(typeof state.patternInset!=="number")state.patternInset=0;
   if(!state.anim||typeof state.anim!=="object")state.anim=structuredClone(DEFAULT_STATE.anim);
   if(!state.anim.motions||typeof state.anim.motions!=="object")state.anim.motions=structuredClone(DEFAULT_STATE.anim.motions);
+  if(!state.anim.audio||typeof state.anim.audio!=="object")state.anim.audio=structuredClone(DEFAULT_STATE.anim.audio);
+  state.anim.audio.reactive=!!state.anim.audio.reactive;
+  state.anim.audio.flash=!!(state.anim.audio.flash||state.anim.audio.hue);
+  delete state.anim.audio.hue;
+  state.anim.audio.sens=(typeof state.anim.audio.sens==="number")?clamp(Math.round(state.anim.audio.sens*10)/10,0.5,4):1.5;
   // migrate old schema (duration/spinTurns/ringSpeed/secPerRotation) → rpm model
   if(typeof state.anim.rpm!=="number"){
     const sec=(typeof state.anim.secPerRotation==="number")?state.anim.secPerRotation
              :(typeof state.anim.duration==="number"?state.anim.duration:2);
-    state.anim.rpm=(sec>0)?clamp(Math.round(60/sec*2)/2,0,10):6;
+    state.anim.rpm=(sec>0)?clamp(Math.round(60/sec*10)/10,0,10):6;
   }
-  state.anim.rpm=clamp(Math.round(state.anim.rpm*2)/2,0,10);
+  state.anim.rpm=clamp(Math.round(state.anim.rpm*10)/10,0,10);   // spin: 0.1 grid
   // per-motion speeds: fall back to the spin rpm for pre-existing saves
-  const spd=k=>{ state.anim[k]=(typeof state.anim[k]==="number")?clamp(Math.round(state.anim[k]*2)/2,0,10):state.anim.rpm; };
-  spd("pulseRpm"); spd("fadeRpm"); delete state.anim.counterRpm;
+  const spd=(k,max)=>{ state.anim[k]=(typeof state.anim[k]==="number")?clamp(Math.round(state.anim[k]*2)/2,0,max):state.anim.rpm; };
+  spd("pulseRpm",160); spd("fadeRpm",160); delete state.anim.counterRpm;
   if(typeof state.anim.fallbackLoop!=="number")state.anim.fallbackLoop=2;
+  if(typeof state.anim.fadeInSec!=="number")state.anim.fadeInSec=1;
   delete state.anim.duration; delete state.anim.spinTurns; delete state.anim.ringSpeed; delete state.anim.secPerRotation; delete state.anim.ringTurns;
   if(state.sp){
     if(typeof state.sp.pyrSteps!=="number")state.sp.pyrSteps=3;
@@ -2657,11 +3227,8 @@ function syncAutoSpacing(){
     }
     return;
   }
-  const c=state.concentric;
-  if(!c.autoSpacing) return;
-  const curve=SPACING_CURVE[state.shape]??SPACING_CURVE_DEFAULT;
-  c.spacing=clamp(Math.round(state.fontSize*curve.slope+curve.offset),8,120);
-  buildPatternControls();
+  // Concentric auto spacing now derives from real glyph height at render time
+  // (see renderConcentricPattern), so nothing to precompute from font size here.
 }
 function bindPair(rangeId,numId,key,after){
   const rg=$("#"+rangeId), nb=$("#"+numId);
@@ -2928,7 +3495,7 @@ function syncActiveRichText(){
     RICH_GROUPS[ed.dataset.eGroup]()[+ed.dataset.eIndex]=ed.innerHTML;
   }
 }
-function afterEditorChange(){ syncActiveRichText(); updateInheritedHints(); scheduleRender(); saveLocal(); }
+function afterEditorChange(){ if(activeEditor && !activeEditor.textContent.trim()) activeEditor.innerHTML=""; syncActiveRichText(); updateInheritedHints(); scheduleRender(); saveLocal(); }
 
 /* ============================================================
    COLLAPSIBLE SECTIONS
@@ -2955,7 +3522,14 @@ function initStage(){
   $("#togglePanelsBtn").addEventListener("click",()=>{
     document.body.classList.toggle("hide-sidepanels");
     syncPanelsToggle();
-    fitView();
+    // Hiding: leave the pattern exactly where it is (panels slide off over it, no
+    // refit, no jump). Showing: refit back into the band between the panels once
+    // they've slid in — handled by the #left transitionend below.
+  });
+  // Only refit when panels are being SHOWN — fit the pattern into their final
+  // slot after the slide lands. When hidden, do nothing so the canvas stays put.
+  const lp=$("#left"); if(lp) lp.addEventListener("transitionend",e=>{
+    if(e.propertyName==="transform" && !document.body.classList.contains("hide-sidepanels")) fitView();
   });
   syncPanelsToggle();
 }
@@ -3122,8 +3696,9 @@ function initBindings(){
     reader.addEventListener("load",()=>{
       const data=String(reader.result||"");
       if(kind==="bg"){ backgroundImageData=data; backgroundImageName=file.name; updateBackgroundImageUi(); }
-      else{ foregroundImageData=data; foregroundImageName=file.name; updateForegroundImageUi(); }
+      else{ foregroundImageData=data; foregroundImageName=file.name; foregroundOriginalData=data; foregroundIsCutout=false; updateForegroundImageUi(); }
       render();
+      saveLocal();
       toast((kind==="bg"?"Background":"Foreground")+" image added","ok");
     });
     reader.addEventListener("error",()=>toast("Could not read that image","err"));
@@ -3145,6 +3720,7 @@ function initBindings(){
   wireDropzone("fgDrop","fgImageInput","fg");
   $("#removeBgImage").addEventListener("click",()=>{ clearBackgroundImage(); toast("Background image removed"); });
   $("#removeFgImage").addEventListener("click",()=>{ clearForegroundImage(); toast("Foreground image removed"); });
+  $("#cutoutFgImage").addEventListener("click",toggleForegroundCutout);
 
   // export
   $("#exportBtn2").addEventListener("click",exportSvg);
@@ -3160,6 +3736,13 @@ function initBindings(){
   });
 
   window.addEventListener("resize",fitView);
+  // Refit whenever the center area itself changes width/height (panel toggle,
+  // sidebar resize, etc), so the canvas always fills between the two sidebars.
+  const wrap=$("#stage-wrap");
+  if(wrap && "ResizeObserver" in window){
+    let _rvRaf=0;
+    new ResizeObserver(()=>{ cancelAnimationFrame(_rvRaf); _rvRaf=requestAnimationFrame(fitView); }).observe(wrap);
+  }
 }
 
 /* ============================================================
@@ -3167,6 +3750,127 @@ function initBindings(){
    Lottie export (separate step) reuses the same math in state.anim.
    ============================================================ */
 const animRuntime={ playing:false, raf:0, t0:0 };
+
+/* ---- audio-reactive runtime (live preview only, never persisted/exported) ---- */
+const audioRuntime={ ctx:null, analyser:null, stream:null, source:null,
+  freq:null, time:null, sens:1.5, lastNow:0, spinAngle:0, env:{amp:0,bass:0} };
+function audioLive(){ return !!(audioRuntime.stream && audioRuntime.analyser); }
+function audioReactiveOn(){ return !!(state.anim.audio && state.anim.audio.reactive && audioLive()); }
+
+/* Capture whatever the user is playing via a shared tab/window (getDisplayMedia
+   with audio). We keep only the audio track; the video track is disabled, not
+   rendered. The analyser is NOT connected to destination → no echo/feedback. */
+async function startAudioCapture(){
+  if(audioLive()) return;
+  const btn=$("#audioCapture"), st=$("#audioStatus");
+  const md=navigator.mediaDevices;
+  if(!md||!md.getDisplayMedia){ toast("Tab/window audio capture isn't supported in this browser.","error"); return; }
+  try{
+    if(btn) btn.disabled=true;
+    const stream=await md.getDisplayMedia({ video:true, audio:true });
+    if(!stream.getAudioTracks().length){
+      stream.getTracks().forEach(t=>t.stop());
+      if(btn) btn.disabled=false;
+      if(st) st.textContent="No audio shared. Re-share and tick “Share tab audio.”";
+      toast("No audio captured — re-share and tick “Share tab audio.”","error");
+      return;
+    }
+    stream.getVideoTracks().forEach(t=>{ t.enabled=false; });   // we don't use the picture
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    const ctx=new Ctx();
+    if(ctx.state==="suspended"){ try{ await ctx.resume(); }catch(e){} }
+    const src=ctx.createMediaStreamSource(stream);
+    const an=ctx.createAnalyser();
+    an.fftSize=2048; an.smoothingTimeConstant=0.75;
+    src.connect(an);
+    audioRuntime.ctx=ctx; audioRuntime.analyser=an; audioRuntime.stream=stream; audioRuntime.source=src;
+    audioRuntime.freq=new Uint8Array(an.frequencyBinCount);
+    audioRuntime.time=new Uint8Array(an.fftSize);
+    audioRuntime.lastNow=0; audioRuntime.spinAngle=0; audioRuntime.env={amp:0,bass:0};
+    audioRuntime.sens=(state.anim.audio&&state.anim.audio.sens)||1.5;
+    stream.getAudioTracks()[0].addEventListener("ended",()=>stopAudioCapture());   // user ends share
+    if(btn){ btn.disabled=false; btn.textContent="■ Stop capture"; btn.classList.add("is-capturing"); }
+    if(st) st.textContent="● Live — reacting to shared audio.";
+    if(state.anim.enabled && !animRuntime.playing) startAnim();
+    updateAnimUi();
+  }catch(err){
+    if(btn) btn.disabled=false;
+    if(err&&err.name==="NotAllowedError"){ if(st) st.textContent="Capture cancelled."; }
+    else { toast("Couldn't start audio capture.","error"); }
+  }
+}
+function stopAudioCapture(){
+  const ar=audioRuntime;
+  if(ar.stream) ar.stream.getTracks().forEach(t=>t.stop());
+  if(ar.ctx){ try{ ar.ctx.close(); }catch(e){} }
+  ar.ctx=ar.analyser=ar.stream=ar.source=ar.freq=ar.time=null;
+  const btn=$("#audioCapture"), st=$("#audioStatus");
+  if(btn){ btn.textContent="▶ Capture audio"; btn.classList.remove("is-capturing"); btn.disabled=false; }
+  if(st) st.textContent="Click Capture, pick a tab or window, and tick “Share tab audio.”";
+  const root=$("#animRoot"); if(root) root.style.filter="";
+  animResetFrame();
+  if(state.anim.enabled && animAnyMotion()){ animRuntime.t0=0; if(!animRuntime.playing) startAnim(); }
+  else stopAnim(true);
+  updateAnimUi();
+}
+
+/* Paint one audio-driven frame: amplitude → pulse+fade+flash, bass → spin velocity.
+   Flash = brightness/contrast/saturate boost on beats (CSS filter, preview only). */
+function audioFrame(now){
+  const ar=audioRuntime, an=ar.analyser, a=state.anim, m=a.motions;
+  const root=$("#animRoot");
+  if(!root||!an) return;
+  const dt=ar.lastNow?Math.min(0.1,(now-ar.lastNow)/1000):0;
+  ar.lastNow=now;
+
+  an.getByteTimeDomainData(ar.time);
+  an.getByteFrequencyData(ar.freq);
+  let sum=0; for(let i=0;i<ar.time.length;i++){ const v=(ar.time[i]-128)/128; sum+=v*v; }
+  const rms=Math.sqrt(sum/ar.time.length);
+  const nb=ar.freq.length, bassBins=Math.max(1,Math.floor(nb*0.06));
+  let bsum=0; for(let i=0;i<bassBins;i++) bsum+=ar.freq[i];
+  const bass=(bsum/bassBins)/255;
+
+  const sens=ar.sens||1.5;
+  const smooth=(cur,target,up,down)=> target>cur? cur+(target-cur)*up : cur+(target-cur)*down;
+  ar.env.amp =smooth(ar.env.amp, clamp(rms*sens,0,1), 0.6, 0.12);
+  ar.env.bass=smooth(ar.env.bass,clamp(bass*sens,0,1),0.7, 0.15);
+
+  const cx=parseFloat(root.getAttribute("data-cx"))||state.abW/2;
+  const cy=parseFloat(root.getAttribute("data-cy"))||state.abH/2;
+  let t="";
+  if(m.spin && spinAllowed()){
+    ar.spinAngle=(ar.spinAngle||0)+(a.spinDir||1)*360*((a.rpm||1)/60)*ar.env.bass*dt;
+    t+=`rotate(${ar.spinAngle.toFixed(2)} ${cx} ${cy}) `;
+  }
+  if(m.pulse){
+    const s=1+(a.pulseAmp||0.1)*2*ar.env.amp;
+    t+=`translate(${cx} ${cy}) scale(${s.toFixed(4)}) translate(${-cx} ${-cy}) `;
+  }
+  root.setAttribute("transform",t.trim());
+  if(m.fade) root.setAttribute("opacity",clamp(0.15+0.85*ar.env.amp,0,1).toFixed(3));
+  else root.removeAttribute("opacity");
+  if(a.audio&&a.audio.flash){
+    const e=ar.env.amp;   // beat-following amplitude envelope
+    root.style.filter=`brightness(${(1+0.7*e).toFixed(3)}) contrast(${(1+0.6*e).toFixed(3)}) saturate(${(1+0.8*e).toFixed(3)})`;
+  } else root.style.filter="";
+
+  // per-ring counter-rotate: alternate rings spin opposite at the (bass-driven) spin
+  // rate. Ring's own angle = sign·spinAngle − parentSpin, so it nets to sign·spinAngle.
+  const counter = m.counterRotate && m.spin && spinAllowed();
+  $$("[data-ring]",root).forEach(rg=>{
+    if(rg.dataset.animBase==null) rg.dataset.animBase=rg.getAttribute("transform")||"";
+    const base=rg.dataset.animBase;
+    if(counter){
+      const i=+rg.getAttribute("data-ring")||0;
+      const sign=(i%2===0)?1:-1;
+      const ang=(sign-1)*(ar.spinAngle||0);          // net = sign·spinAngle after inheriting parent spin
+      rg.setAttribute("transform",`rotate(${ang.toFixed(2)} ${cx} ${cy}) ${base}`.trim());
+    } else {
+      rg.setAttribute("transform",base);
+    }
+  });
+}
 
 function animSpinning(){ return (state.anim.rpm||0)>0; }
 
@@ -3183,18 +3887,22 @@ function gcdInt(a,b){ a=Math.abs(Math.round(a)); b=Math.abs(Math.round(b)); whil
    Counter-rotate is a sub-option of spin → needs spin on. */
 function animLoopInfo(){
   const a=state.anim, m=a.motions;
-  const u=v=>Math.round((v||0)*2);                      // speed → half-RPM units
+  const u=v=>Math.round((v||0)*10);                     // speed → tenth-RPM units (0.1 grid)
   const spinOn = m.spin && spinAllowed();                // pyramid never rotates
   const spinU  = spinOn ? u(a.rpm)       : 0;
   const cntU   = (spinOn&&m.counterRotate) ? spinU : 0;   // counter reuses the spin speed
   const pulU   = m.pulse ? u(a.pulseRpm)  : 0;
-  const fadU   = m.fade  ? u(a.fadeRpm)   : 0;
+  const introFade = m.fade && a.fadeMode==="intro";           // one-shot: does NOT drive the loop
+  const fadU   = (m.fade && !introFade) ? u(a.fadeRpm) : 0;
+  const fadeInSec = clamp(a.fadeInSec||1,0.1,10);
   let g=0; [spinU,cntU,pulU,fadU].forEach(x=>{ if(x>0) g=gcdInt(g,x); });   // gcd(0,x)=x
   if(g>0) return {
-    period:120/g,
-    spinTurns:spinU/g, counterTurns:cntU/g, pulseCycles:pulU/g, fadeCycles:fadU/g
+    period:600/g,
+    spinTurns:spinU/g, counterTurns:cntU/g, pulseCycles:pulU/g, fadeCycles:fadU/g, fadeInSec
   };
-  return { period:Math.max(0.25,a.fallbackLoop||2), spinTurns:0, counterTurns:0, pulseCycles:0, fadeCycles:0 };
+  // no cyclic motion: fallback loop, but ensure an intro fade fits inside it
+  const base=Math.max(0.25,a.fallbackLoop||2);
+  return { period:introFade?Math.max(base,fadeInSec):base, spinTurns:0, counterTurns:0, pulseCycles:0, fadeCycles:0, fadeInSec };
 }
 function animPeriod(){ return animLoopInfo().period; }
 
@@ -3204,7 +3912,7 @@ function animAnyMotion(){
 }
 
 /* Compute the loop phase p∈[0,1) and paint one frame onto #animRoot + rings. */
-function applyAnimFrame(p){
+function applyAnimFrame(p,elapsedSec){
   const root=$("#animRoot");
   if(!root) return;
   const a=state.anim, m=a.motions;
@@ -3218,18 +3926,25 @@ function applyAnimFrame(p){
     const ang=360*info.spinTurns*(a.spinDir||1)*p;   // whole turns/loop → seamless
     t+=`rotate(${ang} ${cx} ${cy}) `;
   }
-  if(m.pulse){
-    const s=1+a.pulseAmp*Math.sin(2*Math.PI*Math.max(1,info.pulseCycles)*p);
+  if(m.pulse && info.pulseCycles>0){   // speed 0 → no pulse (frozen at full size)
+    // breathe outward from rest → peak → rest; never shrinks below 1 (no inward suck)
+    const s=1+a.pulseAmp*0.5*(1-Math.cos(2*Math.PI*info.pulseCycles*p));
     t+=`translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy}) `;
   }
   root.setAttribute("transform",t.trim());
 
   // ----- fade -----
   if(m.fade){
-    let o;
-    if(a.fadeMode==="intro") o=clamp(p/0.25,0,1);
-    else o=0.2+0.8*(0.5-0.5*Math.cos(2*Math.PI*Math.max(1,info.fadeCycles)*p));
-    root.setAttribute("opacity",o.toFixed(3));
+    let o=null;
+    if(a.fadeMode==="intro"){
+      // fade in over fadeInSec real seconds, then hold full — plays ONCE, never restarts.
+      // Driven by absolute elapsed time (monotonic), so a looping spin/pulse can't re-trigger it.
+      const t=(elapsedSec!=null)?elapsedSec:p*info.period;   // fallback for direct/deterministic calls
+      o=clamp(t/info.fadeInSec,0,1);
+    }
+    else if(info.fadeCycles>0) o=0.2+0.8*(0.5-0.5*Math.cos(2*Math.PI*info.fadeCycles*p));   // speed 0 → no fade
+    if(o!=null) root.setAttribute("opacity",o.toFixed(3));
+    else root.removeAttribute("opacity");
   } else {
     root.removeAttribute("opacity");
   }
@@ -3258,6 +3973,7 @@ function animResetFrame(){
   if(!root) return;
   root.removeAttribute("transform");
   root.removeAttribute("opacity");
+  root.style.filter="";
   $$("[data-ring]",root).forEach(rg=>{
     if(rg.dataset.animBase!=null) rg.setAttribute("transform",rg.dataset.animBase);
   });
@@ -3265,16 +3981,21 @@ function animResetFrame(){
 
 function animLoop(now){
   if(!animRuntime.playing) return;
-  if(!animRuntime.t0) animRuntime.t0=now;
-  const dur=animPeriod()*1000;
-  const p=((now-animRuntime.t0)%dur)/dur;
-  applyAnimFrame(p);
+  if(audioReactiveOn()){
+    audioFrame(now);                 // audio replaces the timed loop for active motions
+  }else{
+    if(!animRuntime.t0) animRuntime.t0=now;
+    const dur=animPeriod()*1000;
+    const p=((now-animRuntime.t0)%dur)/dur;
+    applyAnimFrame(p,(now-animRuntime.t0)/1000);
+  }
   animRuntime.raf=requestAnimationFrame(animLoop);
 }
 
 function startAnim(){
   if(animRuntime.playing) return;
-  if(!state.anim.enabled||!animAnyMotion()) return;
+  if(!state.anim.enabled) return;
+  if(!animAnyMotion() && !audioReactiveOn()) return;   // audio-only (e.g. hue) still runs
   animRuntime.playing=true;
   animRuntime.t0=0;
   animRuntime.raf=requestAnimationFrame(animLoop);
@@ -3302,6 +4023,21 @@ function updateAnimUi(){
   show("animSpinGroup",m.spin&&canSpin);   // spin group hosts the counter-rotate toggle (sub-option)
   show("animPulseGroup",m.pulse);
   show("animFadeGroup",m.fade);
+  // Fade sub-controls swap by mode: loop → cycles/min, intro → fade-in duration
+  const intro=a.fadeMode==="intro";
+  show("animFadeSpeedField",m.fade&&!intro);
+  show("animFadeInField",m.fade&&intro);
+  // audio-reactive group: always visible when enabled; its controls unfold when reactive is on
+  show("animAudioGroup",true);
+  const reactive=!!(a.audio&&a.audio.reactive);
+  const ac=$("#audioControls"); if(ac) ac.style.display=(on&&reactive)?"":"none";
+  // While audio is driving, disable timed controls it ignores (pulse/fade speed,
+  // fade mode + fade-in, counter-rotate). Spin RPM/dir + pulse Grow still apply.
+  const audioDriving=audioReactiveOn();
+  const dis=sel=>{ const e=$(sel); if(!e) return; e.disabled=audioDriving;
+    const wrap=e.closest(".field,.inline-toggle"); if(wrap) wrap.classList.toggle("is-disabled",audioDriving); };
+  ["#animPulseRpm","#animPulseRpmN","#animFadeRpm","#animFadeRpmN",
+   "#animFadeIn","#animFadeInN","#animFadeMode"].forEach(dis);
 }
 
 /* Push state.anim into the controls (called from syncControlsFromState). */
@@ -3313,10 +4049,15 @@ function syncAnimControls(){
   setVal("animSpeed",a.rpm); setVal("animSpeedN",a.rpm);
   setVal("animPulseRpm",a.pulseRpm); setVal("animPulseRpmN",a.pulseRpm);
   setVal("animFadeRpm",a.fadeRpm); setVal("animFadeRpmN",a.fadeRpm);
+  setVal("animFadeIn",a.fadeInSec); setVal("animFadeInN",a.fadeInSec);
   setVal("animFps",a.fps); setVal("animFpsN",a.fps);
   const dir=$("#animDir"); if(dir) dir.value=String(a.spinDir);
-  setVal("animPulseAmp",a.pulseAmp); setVal("animPulseAmpN",a.pulseAmp);
+  setVal("animPulseAmp",Math.round(a.pulseAmp*100)); setVal("animPulseAmpN",Math.round(a.pulseAmp*100));
   const fm=$("#animFadeMode"); if(fm) fm.value=a.fadeMode;
+  const au=a.audio||{};
+  setVal("audioReactive",!!au.reactive);
+  setVal("audioFlash",!!au.flash);
+  setVal("audioSens",au.sens); setVal("audioSensN",au.sens);
   updateAnimUi();
 }
 
@@ -3335,7 +4076,7 @@ function initAnim(){
   };
   // Start or stop the loop to match current enabled + active-motion state.
   const syncPlayback=()=>{
-    if(state.anim.enabled && animAnyMotion()) startAnim();
+    if(state.anim.enabled && (animAnyMotion()||audioReactiveOn())) startAnim();
     else stopAnim(true);
   };
   const check=(id,setter)=>{
@@ -3363,14 +4104,29 @@ function initAnim(){
   check("animCounter",v=>state.anim.motions.counterRotate=v);
 
   const spd=v=>clamp(Math.round(v*2)/2,0,10);
-  pair("animSpeed","animSpeedN",v=>{ state.anim.rpm=spd(v); animRuntime.t0=0; });
-  pair("animPulseRpm","animPulseRpmN",v=>{ state.anim.pulseRpm=spd(v); animRuntime.t0=0; });
-  pair("animFadeRpm","animFadeRpmN",v=>{ state.anim.fadeRpm=spd(v); animRuntime.t0=0; });
+  const spdS=v=>clamp(Math.round(v*10)/10,0,10);  // spin on 0.1 grid (loop math now tenth-RPM)
+  const spdP=v=>clamp(Math.round(v*2)/2,0,160);   // pulse + fade range higher (cycles/min)
+  pair("animSpeed","animSpeedN",v=>{ state.anim.rpm=spdS(v); animRuntime.t0=0; });
+  pair("animPulseRpm","animPulseRpmN",v=>{ state.anim.pulseRpm=spdP(v); animRuntime.t0=0; });
+  pair("animFadeRpm","animFadeRpmN",v=>{ state.anim.fadeRpm=spdP(v); animRuntime.t0=0; });
   pair("animFps","animFpsN",v=>state.anim.fps=clamp(Math.round(v),10,60));
-  pair("animPulseAmp","animPulseAmpN",v=>state.anim.pulseAmp=clamp(v,0,0.5));
+  pair("animPulseAmp","animPulseAmpN",v=>state.anim.pulseAmp=clamp(Math.round(v)/100,0,0.5));
+  pair("animFadeIn","animFadeInN",v=>{ state.anim.fadeInSec=clamp(Math.round(v*10)/10,0.1,10); animRuntime.t0=0; });
 
   $("#animDir").addEventListener("change",e=>{ state.anim.spinDir=Number(e.target.value)||1; saveLocal(); });
-  $("#animFadeMode").addEventListener("change",e=>{ state.anim.fadeMode=e.target.value; saveLocal(); });
+  $("#animFadeMode").addEventListener("change",e=>{ state.anim.fadeMode=e.target.value; animRuntime.t0=0; updateAnimUi(); saveLocal(); });
+
+  // ---- audio reactive ----
+  $("#audioReactive").addEventListener("change",e=>{
+    state.anim.audio.reactive=e.target.checked;
+    if(!e.target.checked) stopAudioCapture();   // leaving reactive mode ends any live capture
+    updateAnimUi(); syncPlayback(); saveLocal();
+  });
+  check("audioFlash",v=>state.anim.audio.flash=v);
+  pair("audioSens","audioSensN",v=>{ state.anim.audio.sens=clamp(Math.round(v*10)/10,0.5,4); audioRuntime.sens=state.anim.audio.sens; });
+  const capBtn=$("#audioCapture");
+  if(capBtn) capBtn.addEventListener("click",()=>{ audioLive()?stopAudioCapture():startAudioCapture(); });
+  audioRuntime.sens=(state.anim.audio&&state.anim.audio.sens)||1.5;
 
   updateAnimUi();
 }
@@ -3570,7 +4326,7 @@ async function buildLottie(){
   const info=animLoopInfo();
   const dur=info.period;    // common loop from all active motion speeds
   const OP=Math.max(1,Math.round(fps*dur));
-  const pulseCyc=Math.max(1,info.pulseCycles), fadeCyc=Math.max(1,info.fadeCycles);
+  const pulseCyc=info.pulseCycles, fadeCyc=info.fadeCycles;   // 0 = that motion frozen (speed 0)
   const W=state.abW, H=state.abH, cx=W/2, cy=H/2;
 
   // fresh, guide-free render read offscreen (no preview transforms baked in)
@@ -3632,20 +4388,24 @@ async function buildLottie(){
     const end=360*info.spinTurns*(a.spinDir||1);   // whole turns/loop → seamless
     rMain={a:1,k:[kf(0,0,true),kf(OP,end,true)]};
   }
-  if(m.pulse){
-    const up=100*(1+a.pulseAmp), dn=100*(1-a.pulseAmp);
+  if(m.pulse && pulseCyc>0){
+    const up=100*(1+a.pulseAmp);
     const k=[]; const q=OP/pulseCyc;                // one pulse cycle per q frames
     for(let c=0;c<pulseCyc;c++){
       const b=q*c;
-      k.push(kf(b,[100,100,100]), kf(b+q*0.25,[up,up,100]),
-             kf(b+q*0.5,[100,100,100]), kf(b+q*0.75,[dn,dn,100]));
+      // rest → expand → rest, eased in/out (matches (1-cos)/2 preview, no inward suck)
+      k.push(kf(b,[100,100,100]), kf(b+q*0.5,[up,up,100]));
     }
     k.push(kf(OP,[100,100,100]));
     sMain={a:1,k};
   }
   if(m.fade){
-    if(a.fadeMode==="intro") oMain={a:1,k:[kf(0,0),kf(OP*0.25,100),kf(OP,100)]};
-    else{
+    if(a.fadeMode==="intro"){
+      const fadeInDur=Math.min(info.fadeInSec, dur);       // seconds; capped at loop length
+      const fEnd=Math.min(OP, Math.max(1,Math.round(fps*fadeInDur)));
+      oMain={a:1,k:[kf(0,0),kf(fEnd,100),kf(OP,100)]};
+    }
+    else if(fadeCyc>0){
       const k=[]; const q=OP/fadeCyc;
       for(let c=0;c<fadeCyc;c++){ const b=q*c; k.push(kf(b,20), kf(b+q*0.5,100)); }
       k.push(kf(OP,20));
