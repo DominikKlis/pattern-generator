@@ -323,6 +323,8 @@ input[type=checkbox]{accent-color:var(--accent);width:18px;height:18px;cursor:po
 .btn.icon{padding:6px 8px}
 .btn[disabled]{opacity:.4;cursor:not-allowed}
 .btn-group{display:flex;gap:6px;flex-wrap:wrap}
+.btn-spinner{display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;vertical-align:-1px;margin-right:5px;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ---------- Rich text toolbar (modern) ---------- */
 .rt-toolbar{
@@ -407,6 +409,7 @@ body.ui-dark .shape-cell path[fill="none"]{stroke:var(--accent)}
   position:absolute;left:0;top:0;transform-origin:0 0;
 }
 #stageSvg{display:block;box-shadow:none}
+#flashOverlay{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;mix-blend-mode:screen;z-index:5;will-change:opacity}
 .pv-light #stage-wrap{background:#e9e9ee}
 .pv-dark #stage-wrap{background:#111820}
 .pv-grid #stage-wrap{
@@ -475,8 +478,8 @@ hr.soft{border:none;border-top:1px solid var(--line);margin:10px 0}
 }
 #topbar .brand{
   display:flex;align-items:center;
-  position:fixed;top:20px;left:18px;right:auto;color:#0b53bf;
-  padding:6px 18px;background:var(--stage-bg);font-size:16px;font-weight:500;
+  position:fixed;top:20px;left:36px;right:auto;color:#0b53bf;
+  padding:6px 0;background:none;font-size:16px;font-weight:500;
   letter-spacing:0;pointer-events:auto;
 }
 #topbar .brand .logo,#topbar .brand small,#topbar .brand>div{display:none}
@@ -973,7 +976,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
         </div>
 
         <!-- 2 · Color -->
-        <div class="subgroup">
+        <div class="subgroup" style="border-top:0;padding-top:0">
           <span class="mini-label">Color</span>
           <div class="rt-toolbar" id="rtToolbar" role="toolbar" aria-label="Text color">
             <div class="rt-group swatch-row" id="rtPresetColors">
@@ -987,8 +990,16 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- Typography: size + weight + spacing -->
+    <div class="section" data-sec="type">
+      <div class="sec-head"><span class="sec-label">Typography</span> <span class="chev">▾</span></div>
+      <div class="sec-body">
+
         <!-- 3 · Size -->
-        <div class="subgroup">
+        <div class="subgroup first">
           <div class="field" id="fontSizeField">
             <label for="fontSize">Font size</label>
             <div class="slider-row"><input type="range" id="fontSize" min="4" max="160" value="26" aria-label="Font size"><input type="number" id="fontSizeN" min="4" max="160" value="26" aria-label="Font size value"></div>
@@ -999,7 +1010,6 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
         <!-- 4 · Font weight (concentric only; hidden when empty) -->
         <div class="subgroup" id="ringWeightGroup" hidden>
-          <span class="mini-label">Font weight</span>
           <div id="ringWeightControl"></div>
         </div>
 
@@ -1007,7 +1017,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
         <div class="subgroup">
           <div class="field">
             <label for="offset">Repeat spacing</label>
-            <div class="slider-row"><input type="range" id="offset" min="0" max="300" value="16" step="1" aria-label="Repeat spacing"><input type="number" id="offsetN" min="0" max="300" value="16" step="1" aria-label="Repeat spacing value"></div>
+            <div class="slider-row"><input type="range" id="offset" min="0" max="300" value="0" step="1" aria-label="Repeat spacing"><input type="number" id="offsetN" min="0" max="300" value="0" step="1" aria-label="Repeat spacing value"></div>
           </div>
         </div>
 
@@ -1020,6 +1030,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
   <section id="center">
     <div id="stage-wrap">
       <div id="stage"></div>
+      <div id="flashOverlay" aria-hidden="true"></div>
     </div>
   </section>
 
@@ -1058,7 +1069,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
       </div>
 
       <!-- Layout: pattern arrangement + transform -->
-      <div class="section" data-sec="layout">
+      <div class="section collapsed" data-sec="layout">
         <div class="sec-head"><span class="sec-label">Layout</span> <span class="chev">▾</span></div>
         <div class="sec-body">
           <div class="subgroup first">
@@ -1247,7 +1258,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
             <div id="audioControls">
               <label class="inline-toggle"><input type="checkbox" id="audioFlash"><span>Flash / brightness</span></label>
               <div class="field"><label for="audioSens">Sensitivity</label>
-                <div class="slider-row"><input type="range" id="audioSens" min="0.5" max="4" step="0.1" value="1.5" aria-label="Audio sensitivity"><input type="number" id="audioSensN" min="0.5" max="4" step="0.1" value="1.5" aria-label="Audio sensitivity value"></div>
+                <div class="slider-row"><input type="range" id="audioSens" min="0.5" max="4" step="0.5" value="1.5" aria-label="Audio sensitivity"><input type="number" id="audioSensN" min="0.5" max="4" step="0.5" value="1.5" aria-label="Audio sensitivity value"></div>
               </div>
               <div class="btn-group" style="margin-top:8px">
                 <button class="btn primary" id="audioCapture" type="button">▶ Capture audio</button>
@@ -1351,7 +1362,7 @@ const DEFAULT_STATE = {
   // typography
   fontFamily:"gotham, Montserrat, sans-serif",
   fontSize:60, fontWeight:"400", italic:false, underline:false,
-  offset:16, textTransform:"none",
+  offset:0, textTransform:"none",
   reverseChars:false,
   // colors
   textColor:"#111111", bgColor:"#ffffff",
@@ -1364,13 +1375,13 @@ const DEFAULT_STATE = {
   sp:{
     w:0.6, h:1, radius:40, sides:6, points:5, innerRatio:0.5, rotate:0,
     spiralTurns:4, spiralSpacing:34, spiralAutoSpacing:true, waveAmp:70, waveFreq:3, thickness:60,
-    steps:5, stepW:80, stepH:80, topW:120, baseW:520, teeth:12,
-    rayStart:24, rayLines:1, rayLineGap:6, rayRot:0,
+    steps:5, stepW:80, stepH:80, topW:120, baseW:520, teeth:10,
+    rayStart:35, rayLines:1, rayLineGap:0, rayRot:0,
     pyrSteps:3, mtnHeight:1, pyrGap:5, pyrFit:1
   },
   // pattern params
-  patternInset:0, // global: insets whole pattern (all modes) toward center
-  concentric:{ rings:2, gap:6, dir:"inward", sizeVary:false, outerPx:40, innerPx:14, alternate:false, ringTexts:["Pattern Playground","DEICHTOR HALLEN"], weightVary:true, weightStart:800, weightEnd:100, weightRepeatVary:false, weightRepeatStart:100, weightRepeatEnd:800 },
+  patternInset:120, // global margin (px) between pattern and canvas edge; 0 = on the edge
+  concentric:{ rings:2, gap:6, dir:"inward", sizeVary:true, outerPx:35, innerPx:58, alternate:false, ringTexts:["Pattern Playground","DEICHTOR HALLEN"], weightVary:true, weightStart:800, weightEnd:100, weightRepeatVary:false, weightRepeatStart:100, weightRepeatEnd:800 },
   // per-line text (HTML) for sun rays; blank line uses main editor text
   radialLineTexts:[],
   // animation (preview + Lottie export)
@@ -1546,14 +1557,20 @@ function repeatRunsToLength(unit, targetLen, colorCycle){
   const times=Math.max(1, Math.ceil(targetLen/step)+1);
   const out=[];
   for(let i=0;i<times;i++){
-    const cyc=[];
+    // Separator between repeats: a real SPACE glyph (plus the offset slider stacked on
+    // as extra dx) — mirrors the square renderer so repeats read "AAAA AAAA", not
+    // "AAAAAAAA". Skipped before the first repeat.
+    if(i>0 && unit.length){
+      const sep={...unit[0], text:" "};
+      if(gap) sep._gapBefore=gap;
+      if(colorCycle) sep._cycle=i;
+      out.push(sep);
+    }
     for(const r of unit){
       const rr={...r};
       if(colorCycle) rr._cycle=i;
-      cyc.push(rr);
+      out.push(rr);
     }
-    if(gap && i>0 && cyc.length) cyc[0]._gapBefore=gap;
-    out.push(...cyc);
   }
   return out;
 }
@@ -1657,12 +1674,24 @@ function createShapePath(shapeType, sp){
       clip=""; bbox={x:cx-outer,y:cy-outer,w:outer*2,h:outer*2};
       extra={openPath:true,layout:"radial",rays,inner,outer}; break;
     }
-    case "snail":
+    case "snail":{
+      // Multiline snail: one Archimedean spiral whose turn gap stacks `lines` rows of
+      // text (each row a radially-offset copy — see renderSnailPattern). Geometry is
+      // shared with the renderer via snailGeom so the outline/bbox match exactly.
+      const gm=snailGeom(sp);
+      let d=""; const steps=gm.turns*60;
+      for(let i=0;i<=steps;i++){
+        const a=i/60*2*Math.PI; const r=gm.spc*a/(2*Math.PI)+gm.r0;
+        const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+        d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);
+      }
+      outline=d; clip=""; const rr=gm.spc*gm.turns+gm.r0; bbox={x:cx-rr,y:cy-rr,w:2*rr,h:2*rr};
+      extra={openPath:true,layout:"snail",cx,cy};
+      break;
+    }
     case "spiral":{
       const turns=clamp(sp.spiralTurns,1,10);
-      // Snail always derives turn spacing from font size (no manual control); the
-      // spiral shape keeps its own configurable spacing.
-      const spc=(shapeType==="snail")?clamp(Math.round(state.fontSize*SNAIL_SPACING_RATIO),10,80):sp.spiralSpacing;
+      const spc=sp.spiralSpacing;
       let d=""; const steps=turns*60; let first=true;
       for(let i=0;i<=steps;i++){
         const a=i/60*2*Math.PI; const r=spc*a/(2*Math.PI)*1.0 + 8;
@@ -1937,15 +1966,22 @@ async function toggleForegroundCutout(){
     foregroundIsCutout=false;
     if(cutoutAutoBg){ backgroundImageData=""; backgroundImageName=""; cutoutAutoBg=false; updateBackgroundImageUi(); }
     updateForegroundImageUi(); render(); saveLocal?.();
-    toast("Cutout undone");
     return;
   }
-  if(btn){ btn.disabled=true; btn.textContent="Cutting out…"; }
-  toast("Removing background… first run downloads a model","ok");
+  const setBtn=label=>{ if(btn) btn.innerHTML='<span class="btn-spinner" aria-hidden="true"></span>'+label; };
+  if(btn){ btn.disabled=true; setBtn("Cutting out…"); }
   try{
     const src=foregroundOriginalData||foregroundImageData;
     const { removeBackground } = await import("https://esm.sh/@imgly/background-removal@1.6.0");
-    const blob = await removeBackground(src);
+    const blob = await removeBackground(src,{
+      // first run fetches the model; surface download % on the button
+      progress:(key,current,total)=>{
+        if(!btn) return;
+        if(String(key).startsWith("fetch")&&total)
+          setBtn("Downloading model "+Math.round(current/total*100)+"%");
+        else setBtn("Cutting out…");
+      }
+    });
     const dataUrl = await new Promise((res,rej)=>{
       const r=new FileReader();
       r.onload=()=>res(String(r.result||""));
@@ -1964,7 +2000,6 @@ async function toggleForegroundCutout(){
     }
     render();
     saveLocal();
-    toast("Subject cut out","ok");
   }catch(err){
     console.error("cutout failed:",err);
     toast("Cutout failed — check your connection and retry","err");
@@ -1974,7 +2009,10 @@ async function toggleForegroundCutout(){
 }
 
 function computeFit(bbox){
-  const pad=state.abPad;
+  // Pattern inset IS the margin (px) between the pattern and the canvas edge: 0 fits the
+  // pattern flush to the edge, larger values pull it inward. Clamp so the pattern never
+  // collapses past the canvas centre.
+  const pad=clamp(state.patternInset||0, 0, Math.min(state.abW,state.abH)/2-1);
   const availW=state.abW-2*pad, availH=state.abH-2*pad;
   const bw=bbox.w||1, bh=bbox.h||1;
   const s=Math.min(availW/bw, availH/bh);
@@ -2019,14 +2057,8 @@ function buildSVG(forExport){
   const fitG=el("g",{transform:`${userT} translate(${fitTransform.tx} ${fitTransform.ty}) scale(${fitTransform.s})`});
   svg.appendChild(fitG);
 
-  // global pattern inset: scale rendered content toward shape center (all modes)
+  // Pattern inset is applied in computeFit (as the fit margin), so nothing extra here.
   let patG=fitG;
-  if(state.patternInset){
-    const maxDim=Math.max(shape.bbox.w,shape.bbox.h)/2||R;
-    const f=clamp(1 - state.patternInset/maxDim, 0.05, 3);
-    patG=el("g",{transform:`translate(${shape.cx} ${shape.cy}) scale(${f}) translate(${-shape.cx} ${-shape.cy})`});
-    fitG.appendChild(patG);
-  }
 
   // animatable wrapper: preview + Lottie transforms hang off this group.
   // Identity transform when idle, so static export is unaffected.
@@ -2040,6 +2072,7 @@ function buildSVG(forExport){
   try{
     if(shape.extra.layout==="radial") renderRadialPattern(patG,defs,shape);
     else if(shape.extra.layout==="pyramid") renderPyramidPattern(patG,defs,shape);
+    else if(shape.extra.layout==="snail") renderSnailPattern(patG,defs,shape);
     else renderConcentricPattern(patG, defs, shape);
   }catch(err){
     console.error("render error:",err);
@@ -2050,9 +2083,9 @@ function buildSVG(forExport){
   if(foregroundImageData){
     const image=el("image",{
       x:0,y:0,width:state.abW,height:state.abH,
-      // cutout over its own scene: match bg fit (slice) for pixel-perfect overlap;
-      // standalone cutout: show whole subject uncropped (meet); full photo: cover (slice)
-      preserveAspectRatio:(foregroundIsCutout&&!cutoutAutoBg)?"xMidYMid meet":"xMidYMid slice"
+      // cutout keeps the source photo's full dimensions (subject in place, margins
+      // transparent), so cover (slice) keeps it pixel-aligned with the original.
+      preserveAspectRatio:"xMidYMid slice"
     });
     image.setAttribute("href",foregroundImageData);
     image.setAttributeNS(XLINK,"xlink:href",foregroundImageData);
@@ -2070,11 +2103,26 @@ function contentRunsWithoutSeparator(){
    (the single content box is hidden for the sun shape), then the editor buffer. */
 function radialLineUnits(){
   const n=clamp(state.concentric.rings,1,10);
+  // Editor 1 (ringTexts[0]) = UPPER line of each ray, editor 2 the next line below, …
+  // Geometric line li runs 0=upper → n-1=lower, so the text source for line li is li.
   let main=null;
   for(let li=0; li<n; li++){ const r=buildRingRuns(li); if(r){ main=r; break; } }
   if(!main) main=contentRunsWithoutSeparator();
   const arr=[];
   for(let li=0; li<n; li++) arr.push(buildRingRuns(li) || main);
+  // Vary font size per line. To match the circle/square editor order (editor 1 = outer
+  // font size, ramping to inner on the last editor), the UPPER line (li 0 = editor 1)
+  // takes outerPx and the LOWER line takes innerPx. Stamped as a per-run `size` so
+  // measuring (ray-length fit + line pitch) and rendering both see the real size.
+  const c=state.concentric;
+  if(sizeVaryShape() && c.sizeVary){
+    const outerPx=c.outerPx!=null?c.outerPx:35, innerPx=c.innerPx!=null?c.innerPx:58;
+    for(let li=0; li<n; li++){
+      const t = n>1 ? li/(n-1) : 0;                       // 0 = upper line → 1 = lower line
+      const size = Math.round(outerPx + (innerPx-outerPx)*t);
+      arr[li]=arr[li].map(r=>({...r,size}));
+    }
+  }
   return arr;
 }
 
@@ -2098,23 +2146,44 @@ function renderRadialPattern(g,defs,shape){
   const c=state.concentric;
   const nLines=clamp(c.rings,1,10);
   const lineRuns=radialLineUnits();
-  // Line pitch fits the real glyph height (max ink height across all lines so none
-  // collide) plus the slider's extra whitespace — mirrors concentric ring spacing.
-  const lineH=Math.max(...lineRuns.map(r=>{const m=measureRunsVExtent(r);return m.asc+m.desc;}));
-  const gap=lineH + (sp.rayLineGap!=null ? sp.rayLineGap : 6);
+  // Per-line vertical metrics (real glyph ink extent at each line's OWN font size).
+  // Uniform pitch breaks down when "vary font size per line" is on — a fixed gap sized
+  // to the tallest line leaves the small lines swimming in whitespace. Space each line
+  // by its neighbours' real ascent/descent instead.
+  const vm=lineRuns.map(r=>measureRunsVExtent(r));
+  const extra=(sp.rayLineGap!=null ? sp.rayLineGap : 6);   // slider whitespace between ink bands
+  // +off runs along the descent direction (px,py is opposite the ascent normal), so a
+  // line's ink spans [off-asc, off+desc]. Stack baselines so the whitespace between
+  // neighbouring ink bands is a constant `extra`, then centre the stack on the ray.
+  const base=new Array(nLines); base[0]=0;
+  for(let li=1; li<nLines; li++) base[li]=base[li-1]+vm[li-1].desc+extra+vm[li].asc;
+  const mid=((base[0]-vm[0].asc)+(base[nLines-1]+vm[nLines-1].desc))/2;
+  for(let li=0; li<nLines; li++) base[li]-=mid;
   // lines are drawn symmetrically around each ray's centerline, offset perpendicular
+  // Swirl/twist: lean each ray's text off the pure-radial direction by `twist` so
+  // words start on the inner circle and fan out tangentially → pinwheel rosette
+  // (twist=0 = classic straight spokes). The word direction is `a+twist`; the
+  // inner-circle start point stays at angle `a`, so at twist>0 rays no longer
+  // converge to a single center point.
+  const twist=deg2rad(sp.rayRot!=null?sp.rayRot:0);
+  const len=outer-inner;
   for(let i=0;i<rays;i++){
-    const a=deg2rad(-90+i*360/rays);
-    const px=Math.cos(a+Math.PI/2), py=Math.sin(a+Math.PI/2); // perpendicular unit vec
+    const a=deg2rad(-90+i*360/rays);       // where the ray anchors on the inner circle
+    const dir=a+twist;                      // direction the text runs
+    const dc=Math.cos(dir), ds=Math.sin(dir);
+    const sx=shape.cx+inner*Math.cos(a), sy=shape.cy+inner*Math.sin(a); // start on inner circle
+    const px=Math.cos(dir+Math.PI/2), py=Math.sin(dir+Math.PI/2); // perp to text direction
     for(let li=0; li<nLines; li++){
-      const off=(li-(nLines-1)/2)*gap;
+      const off=base[li];
       const ox=off*px, oy=off*py;
-      const x1=shape.cx+inner*Math.cos(a)+ox, y1=shape.cy+inner*Math.sin(a)+oy;
-      const x2=shape.cx+outer*Math.cos(a)+ox, y2=shape.cy+outer*Math.sin(a)+oy;
+      const x1=sx+ox, y1=sy+oy;
+      const x2=sx+len*dc+ox, y2=sy+len*ds+oy;
       const id=uid("ray");
       defs.appendChild(el("path",{id,d:`M ${x1} ${y1} L ${x2} ${y2}`,fill:"none"}));
-      // line 0 = innermost (weightStart), last line = outermost (weightEnd)
-      const weight = c.weightVary ? ringWeight(li,0,nLines-1,c) : state.fontWeight;
+      // Match circle/square editor order: upper line (li 0 = editor 1) = weightEnd/thin
+      // like the outermost ring, ramping to weightStart/bold on the lower line. Reverse
+      // the index into ringWeight (which maps 0→weightStart) to flip the ramp.
+      const weight = c.weightVary ? ringWeight(nLines-1-li,0,nLines-1,c) : state.fontWeight;
       const text=el("text",{
         "font-family":state.fontFamily,
         "font-size":state.fontSize,
@@ -2172,8 +2241,8 @@ function renderConcentricPattern(g, defs, shape){
     const varyOn = sizeVaryShape() && c.sizeVary;
     opts={metrics, gap: c.gap!=null ? c.gap : 6,
       textSize: varyOn ? "custom" : (sizeVaryShape() ? "uniform" : "shrink-in"),
-      outerScale: (c.outerPx!=null?c.outerPx:40)/ref,
-      innerScale: (c.innerPx!=null?c.innerPx:14)/ref};
+      outerScale: (c.outerPx!=null?c.outerPx:35)/ref,
+      innerScale: (c.innerPx!=null?c.innerPx:58)/ref};
   }
   const {base, paths}=createConcentricPaths(state.shape, state.sp, ringCount, c.spacing, c.dir, opts);
   const fMin=Math.min(...paths.map(p=>p.f)), fMax=Math.max(...paths.map(p=>p.f));
@@ -2187,7 +2256,9 @@ function renderConcentricPattern(g, defs, shape){
     // they use an identity transform; everything else is a scaled copy of the base.
     const ringG=el("g",{transform: p.d ? "translate(0 0)" : `translate(${base.cx} ${base.cy}) scale(${p.f}) translate(${-base.cx} ${-base.cy})`});
     ringG.setAttribute("data-ring",idx);
-    const ringWt = c.weightVary ? ringWeight(p.f, fMin, fMax, c) : state.fontWeight;
+    // Snail is a single continuous spiral (no rings), so it ignores per-ring weight
+    // variation and uses the uniform Font weight slider.
+    const ringWt = (c.weightVary && state.shape!=="snail") ? ringWeight(p.f, fMin, fMax, c) : state.fontWeight;
     // Per-ring font size. The ring group is scaled by p.f, so an attr of X renders at
     // X*p.f. p.ts is the intended font multiplier vs fontSize (rendered = fontSize*ts),
     // set per textSize mode with matching auto-spacing. Counter the group scale so the
@@ -2402,12 +2473,7 @@ function renderPyramidPattern(g, defs, shape){
   const fallback=firstFilledRingRuns()||buildUnitRuns();
   if(!fallback.length) return;
   const runsForEdge=ei=>{ const r=buildRingRuns(ei%count); return (r&&r.length)?r:fallback; };
-  const toksOf=unit=>{
-    const out=[];
-    for(const r of unit){ for(const ch of [...r.text]) out.push({...r,text:ch}); }
-    return out;
-  };
-  // merge adjacent same-style chars back into runs (fewer tspans, keeps colors)
+  // merge adjacent same-style runs (fewer tspans, keeps colors)
   const sameStyle=(a,b)=>a.color===b.color&&a.bold===b.bold&&a.italic===b.italic
     &&a.underline===b.underline&&a.strike===b.strike&&a.size===b.size
     &&a.family===b.family&&a.letter===b.letter;
@@ -2420,7 +2486,6 @@ function renderPyramidPattern(g, defs, shape){
     }
     return out;
   };
-  const gap=contentGap();   // Repeat-spacing slider: extra whitespace between repeats.
   // edges of the ridge
   const edges=[];
   for(let i=0;i<pts.length-1;i++){
@@ -2444,88 +2509,180 @@ function renderPyramidPattern(g, defs, shape){
     const m=_measCtx.measureText("Hxdlbf");
     return m.actualBoundingBoxAscent||m.fontBoundingBoxAscent||fontSize*0.72;
   })();
-  const padL=asc*1.06, padR=fontSize*0.3;            // left band = ascent, right = descenders
+  const ascK=1.06;                                   // left band = ascent×this
+  const TREAD_GAP=0.2;                                // tread pulls back this×em at outer/yielded corners
+  const MAX_SCALE=1.2;                                // cap per-edge font at this×base so sizes stay close
   const leftN=e=>[e.dy/e.len, -e.dx/e.len];          // unit normal, left of travel
   const isHoriz=e=>Math.abs(e.dx)>Math.abs(e.dy);    // tread vs riser
   const concaveAt=(inDir,outDir)=>inDir[0]*outDir[1]-inDir[1]*outDir[0]<0;
   // Axis-aligned clip band for one edge's drawn span P0→P1 (already chopped/extended
-  // at the corners). Left of travel = glyph ascent (padL), right = descenders (padR).
-  const bandPoly=(ei, P0, P1)=>{
+  // at the corners). Left of travel = glyph ascent (pL), right = descenders (pR).
+  const bandPoly=(ei, P0, P1, pL, pR)=>{
     const L=leftN(edges[ei]);
     return [
-      [P0[0]+padL*L[0], P0[1]+padL*L[1]],
-      [P1[0]+padL*L[0], P1[1]+padL*L[1]],
-      [P1[0]-padR*L[0], P1[1]-padR*L[1]],
-      [P0[0]-padR*L[0], P0[1]-padR*L[1]],
+      [P0[0]+pL*L[0], P0[1]+pL*L[1]],
+      [P1[0]+pL*L[0], P1[1]+pL*L[1]],
+      [P1[0]-pR*L[0], P1[1]-pR*L[1]],
+      [P0[0]-pR*L[0], P0[1]-pR*L[1]],
     ];
   };
-  const guard=edges.length*400;                      // stop runaway loops
-  let steps=0;
+  // Fit exactly by SCALING each edge's font so one instance of its text spans the edge
+  // at natural spacing. Trim surrounding whitespace, measure at base fontSize, then
+  // scale = span / naturalWidth. Treads span their exact segment; a riser's span is
+  // adjusted by its neighbouring tread's scaled ascent at each corner (see below), so
+  // baseScale (tread scale) is computed first and is free of that dependency.
+  const instOf=ei=>{
+    const runs=runsForEdge(ei).map(r=>({...r}));
+    if(!runs.length) return {runs:[],w:0};
+    runs[0]={...runs[0], text:runs[0].text.replace(/^\s+/,"")};
+    const j=runs.length-1; runs[j]={...runs[j], text:runs[j].text.replace(/\s+$/,"")};
+    const t=runs.filter(r=>r.text.length);
+    let w=0; for(const r of t) w+=pyrTokenWidth(r,fontSize);
+    return {runs:t,w};
+  };
+  const edgeInsts=edges.map((_,ei)=>instOf(ei));
+  const baseScale=edges.map((e,ei)=> edgeInsts[ei].w>0 ? e.len/edgeInsts[ei].w : 1);
+  const jut=ei=> asc*baseScale[ei]*ascK;             // an edge's ascent when scaled to its segment
+  // Which edge of a corner owns the shared inner square: the one with MORE text (larger
+  // natural width) — it keeps its full length there and renders bigger; the other yields.
+  // Ties go to the tread so equal-length runs keep the classic tread-wins staircase.
+  const winnerAt=(i,j)=> edgeInsts[i].w!==edgeInsts[j].w
+      ? (edgeInsts[i].w>edgeInsts[j].w ? i : j)
+      : (isHoriz(edges[i]) ? i : j);
   for(let ei=0; ei<edges.length; ei++){
     const e=edges[ei];
-    const toks=toksOf(runsForEdge(ei));               // this edge's alternating text
-    if(!toks.length) continue;
+    const inst=edgeInsts[ei];                          // trimmed single instance + base width
+    if(!inst.runs.length) continue;
     const ux=e.dx/e.len, uy=e.dy/e.len;
     const uPrev = ei>0 ? [edges[ei-1].dx/edges[ei-1].len, edges[ei-1].dy/edges[ei-1].len] : null;
     const uNext = ei<edges.length-1 ? [edges[ei+1].dx/edges[ei+1].len, edges[ei+1].dy/edges[ei+1].len] : null;
     const ax=e.a[0], ay=e.a[1];
     // Corner handling — every corner joins a tread (horizontal) with a riser (vertical).
-    // The tread always wins the corner square; the riser adapts at each end that meets
-    // a tread. SVG textPath only draws glyphs that lie ON the path, so we resize the
-    // riser's DRAWN span (path + fill + clip together), not just the clip:
-    //   • CONCAVE (inner) corner → pull the riser IN by padL so it stops before the row
-    //     the tread owns → no overlap (the tread's perpendicular jut covers the square).
-    //   • CONVEX (outer) corner → push the riser OUT by padL past the vertex so its own
-    //     jut fills the outer corner square that neither edge would otherwise reach → no gap.
-    // Treads keep their exact segment; the riser's give-and-take closes every corner.
+    //   • CONCAVE (inner) corner → the WINNER (more text) keeps its full length into the
+    //     square; the LOSER retreats by the winner's scaled ascent → no overlap. This is
+    //     the dynamic bit: a long riser can claim the corner space a short tread used to.
+    //   • CONVEX (outer) corner → the riser wraps the outer square (extends past the vertex
+    //     by the tread's ascent); the tread pulls back a small breathing gap from the riser.
+    const gapPx=fontSize*baseScale[ei]*TREAD_GAP;     // breathing gap ≈ fraction of the em
+    // When a TREAD loses the inner corner to a longer riser it retreats just enough to
+    // clear the riser, which looks cramped — add extra breathing space there.
+    const loseBack=w=> jut(w) + (isHoriz(e) ? gapPx : 0);
     let sDist=0, eDist=e.len;                         // drawn span along the edge, from A
-    if(!isHoriz(e)){
-      if(uPrev && isHoriz(edges[ei-1])) sDist = concaveAt(uPrev,[ux,uy]) ?  padL : -padL;
-      if(uNext && isHoriz(edges[ei+1])) eDist = e.len + (concaveAt([ux,uy],uNext) ? -padL : padL);
+    if(uPrev){
+      const p=ei-1, concave=concaveAt(uPrev,[ux,uy]);
+      if(concave){ if(winnerAt(ei,p)!==ei) sDist += loseBack(winnerAt(ei,p)); } // loser retreats
+      else if(!isHoriz(e)) sDist -= jut(p);                                     // riser wraps outer
+      else sDist = gapPx;                                                       // tread breathing gap
     }
-    const inner=eDist-sDist;                          // length of text to lay down
+    if(uNext){
+      const q=ei+1, concave=concaveAt([ux,uy],uNext);
+      if(concave){ if(winnerAt(ei,q)!==ei) eDist -= loseBack(winnerAt(ei,q)); } // loser retreats
+      else if(!isHoriz(e)) eDist += jut(q);                                     // riser wraps outer
+      else eDist = e.len - gapPx;                                               // tread breathing gap
+    }
+    const spanLen=eDist-sDist;                        // path length this edge fills
+    if(spanLen<=0) continue;
     const P0=[ax+ux*sDist, ay+uy*sDist];
     const P1=[ax+ux*eDist, ay+uy*eDist];
-    // pull characters until the drawn span is full — include the token that crosses
-    // the far end so there is no trailing gap (the clip trims its overflow)
-    const chosen=[]; let w=0, ci=0;                  // each edge starts its own text fresh
-    while(steps<guard){
-      const iu=ci%toks.length;
-      // Repeat boundary (cycle wraps to 0): always emit a separator SPACE so repeats
-      // never butt together, then stack the offset slider on top as extra dx. Skipped
-      // at the edge start so text still begins flush at the vertex.
-      if(chosen.length && iu===0){
-        const sep={...toks[0], text:" "};
-        if(gap) sep._gapBefore=gap;
-        chosen.push(sep); w+=pyrTokenWidth(sep,fontSize)+(gap||0);
-      }
-      const t={...toks[iu]};
-      if(!chosen.length && !t.text.trim()){ ci++; steps++; continue; } // drop leading space
-      chosen.push(t); w+=pyrTokenWidth(t,fontSize); ci++; steps++;
-      if(w>=inner) break;                            // filled past the end → clip cuts the rest
-    }
-    if(!chosen.length) continue;
+    // Scale this edge's font so one natural-spacing instance spans P0→P1, but cap the
+    // scale so short words don't blow up and edges don't diverge too much in size. When
+    // capped the text is narrower than the span, so centre it along the edge.
+    const fit=inst.w>0 ? spanLen/inst.w : 1;
+    const scale=Math.min(fit, MAX_SCALE);
+    const eFont=Math.max(1, fontSize*scale);
+    const startOff=Math.max(0, (spanLen - inst.w*scale)/2);   // 0 when it fills, else centred
+    const padLe=asc*scale*ascK, padRe=eFont*0.3;      // per-edge band grows with the font
     const pid=uid("py");
     defs.appendChild(el("path",{id:pid,d:`M ${P0[0].toFixed(2)} ${P0[1].toFixed(2)} L ${P1[0].toFixed(2)} ${P1[1].toFixed(2)}`,fill:"none"}));
-    const band=bandPoly(ei,P0,P1);
+    const band=bandPoly(ei,P0,P1,padLe,padRe);
     const clid=uid("pyc");
     const cp=el("clipPath",{id:clid});
     cp.appendChild(el("polygon",{points:band.map(p=>`${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(" ")}));
     defs.appendChild(cp);
     const text=el("text",{
-      "font-family":state.fontFamily,"font-size":fontSize,
+      "font-family":state.fontFamily,"font-size":eFont.toFixed(2),
       "font-weight":state.fontWeight, fill:state.textColor
     });
     text.setAttribute("clip-path",`url(#${clid})`);
-    // Preserve whitespace so the rendered advance matches what pyrTokenWidth measured;
-    // otherwise SVG collapses double-spaces and the ribbon stops short of the corner.
     text.setAttribute("xml:space","preserve");
     if(state.italic)text.setAttribute("font-style","italic");
     const tp=el("textPath");
     tp.setAttributeNS(XLINK,"xlink:href","#"+pid);
     tp.setAttribute("href","#"+pid);
-    tp.setAttribute("startOffset","0%");             // start at the vertex → continuous flow
-    runsToTspansConcentric(mergeRuns(chosen), tp, ei, state.fontWeight);  // alt-color cycles per edge
+    tp.setAttribute("startOffset",startOff.toFixed(2));   // centred if capped, else flush at vertex
+    runsToTspansConcentric(mergeRuns(inst.runs), tp, ei, state.fontWeight);  // alt-color cycles per edge
+    text.appendChild(tp);
+    g.appendChild(text);
+  }
+}
+/* ----- SNAIL MODE ----- */
+/* Per-line font size for the snail: innermost line (k 0) = innerPx, outermost = outerPx
+   when "Vary font size per line" is on, else the single Font size slider. */
+function snailLineSizes(lines){
+  const c=state.concentric;
+  if(sizeVaryShape() && c.sizeVary){
+    const o=c.outerPx!=null?c.outerPx:40, i=c.innerPx!=null?c.innerPx:14;
+    return Array.from({length:lines},(_,k)=> Math.max(4, Math.round(lines>1 ? i+(o-i)*(k/(lines-1)) : (o+i)/2)));
+  }
+  return Array.from({length:lines},()=>state.fontSize);
+}
+/* Shared snail geometry (used by createShapePath for the outline/bbox and by the
+   renderer for per-line offsets). Rows inside a group are packed by their own height;
+   an extra groupGap on the per-turn step opens a wider band before the next group. */
+function snailGeom(sp){
+  const turns=clamp(sp.spiralTurns,1,10);
+  const lines=clamp(Math.round(state.concentric.rings||1),1,10);
+  const sizes=snailLineSizes(lines);
+  const rowH=sizes.map(s=>Math.max(6, s*SNAIL_ROW_RATIO));
+  const offsets=[]; let acc=0;
+  for(let k=0;k<lines;k++){ offsets.push(acc); acc+=rowH[k]; }
+  const groupGap=Math.round(state.fontSize*SNAIL_GROUP_EXTRA);
+  return {turns,lines,sizes,offsets,spc:acc+groupGap,r0:8};
+}
+/* One Archimedean spiral whose turn gap holds `lines` stacked rows. Each row is a
+   radially-offset copy of the spiral carrying its own text field (like rings), so the
+   rows wind together hugging the same curve. Blank fields inherit the first filled
+   field, then the main editor. Honors the same text options as concentric shapes:
+   per-line size, per-line weight, and per-repeat weight. */
+function renderSnailPattern(g, defs, shape){
+  const {cx,cy}=shape.extra;
+  const c=state.concentric;
+  const {turns,lines,sizes,offsets,spc,r0}=snailGeom(state.sp);
+  const fallback=firstFilledRingRuns()||buildUnitRuns();
+  // Editor 1 (ringTexts[0]) = OUTERMOST arm, matching circle/square. Arm k runs
+  // 0=innermost → lines-1=outermost, so its text source is ringTexts[lines-1-k].
+  const armRuns=k=>{ const r=buildRingRuns(lines-1-k); return (r&&r.length)?r:fallback; };
+  const steps=turns*60;
+  for(let k=0;k<lines;k++){
+    let runs=armRuns(k);
+    if(!runs || !runs.length) continue;
+    const size=sizes[k];
+    runs=runs.map(r=>({...r,size}));                    // per-line size (measured + rendered)
+    const lineWt = c.weightVary ? ringWeight(k, 0, Math.max(1,lines-1), c) : state.fontWeight;
+    let d=""; const off=r0+offsets[k];
+    for(let i=0;i<=steps;i++){
+      const a=i/60*2*Math.PI; const r=spc*a/(2*Math.PI)+off;
+      const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+      d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);
+    }
+    const pid=uid("sn");
+    defs.appendChild(el("path",{id:pid,d,fill:"none"}));
+    const filled=repeatRunsToLength(runs, measurePathLen(d), true);
+    // Per-repeat weight: tag each repeat's runs with its cycle weight (seam-safe ping-pong).
+    if(c.weightRepeatVary){
+      let maxCyc=0; for(const r of filled) if((r._cycle||0)>maxCyc) maxCyc=r._cycle;
+      for(const r of filled) r._weight=repeatWeight(r._cycle||0, maxCyc, c);
+    }
+    const text=el("text",{
+      "font-family":state.fontFamily,"font-size":size,
+      "font-weight":lineWt, fill:ringColor(k)
+    });
+    if(state.italic)text.setAttribute("font-style","italic");
+    const tp=el("textPath");
+    tp.setAttributeNS(XLINK,"xlink:href","#"+pid);
+    tp.setAttribute("href","#"+pid);
+    tp.setAttribute("startOffset","0%");
+    runsToTspansConcentric(filled, tp, k, lineWt);
     text.appendChild(tp);
     g.appendChild(text);
   }
@@ -2604,23 +2761,12 @@ function applyView(){
 function fitView(){
   const wrap=$("#stage-wrap");
   const W=wrap.clientWidth, H=wrap.clientHeight, pad=40;
-  // Sidebars float (position:fixed) over the full-bleed canvas, so fit the pattern
-  // into the horizontal band BETWEEN them — not the whole viewport.
-  let left=0, right=W;
-  if(!document.body.classList.contains("hide-sidepanels")){
-    // Use offsetLeft/offsetWidth (transform-agnostic) so the fit targets each
-    // sidebar's FINAL layout slot — even while it's still sliding in during the
-    // intro. Reading getBoundingClientRect mid-transition would fit full-width
-    // then jump to the band once the panels land.
-    const l=$("#left"), r=$("#right");
-    if(l && l.offsetWidth) left=Math.max(left, l.offsetLeft+l.offsetWidth);
-    if(r && r.offsetWidth) right=Math.min(right, r.offsetLeft);
-  }
-  if(right-left < 80){ left=0; right=W; } // sidebars overlap: fall back to full width
-  const availW=Math.max(50,(right-left)-pad*2), availH=Math.max(50,H-pad*2);
+  // Always fit the whole viewport — the sidebars float on top of the full-bleed
+  // canvas, so the pattern centers in the full width regardless of panel state.
+  const availW=Math.max(50,W-pad*2), availH=Math.max(50,H-pad*2);
   const z=Math.min(availW/state.abW, availH/state.abH);
   view.zoom=clamp(z,0.05,4);
-  view.x=left+((right-left)-state.abW*view.zoom)/2;
+  view.x=(W-state.abW*view.zoom)/2;
   view.y=(H-state.abH*view.zoom)/2;
   applyView();
 }
@@ -2847,7 +2993,7 @@ function syncRichEditors(host, active, prefix){
   updateInheritedHints(host);
 }
 function refreshRingEditors(){
-  syncRichEditors($("#ringEditors"), ringEditorsActive(), state.shape==="pyramid"?"Edge":"Ring");
+  syncRichEditors($("#ringEditors"), ringEditorsActive(), state.shape==="pyramid"?"Edge":(state.shape==="snail"?"Line":"Ring"));
   updateContentLayout();
 }
 function refreshRayLineEditors(){
@@ -2876,6 +3022,7 @@ function buildShapeControls(){
   if(t==="sun"){
     add(sliderField("Rays","teeth",4,40,1,sp.teeth,v=>sp.teeth=v));
     add(sliderField("Ray start offset (%)","rayStart",0,80,1,sp.rayStart,v=>sp.rayStart=v));
+    add(sliderField("Swirl / twist (°)","rayRot",-90,90,1,sp.rayRot!=null?sp.rayRot:0,v=>sp.rayRot=v));
     add(sliderField("Line spacing","rayLineGap",0,80,1,sp.rayLineGap!=null?sp.rayLineGap:6,v=>sp.rayLineGap=v));
     // "Lines per ray" + "Vary weight per line" live in the left Text panel,
     // next to the per-line editors they drive (see buildPatternControls sun branch).
@@ -2897,9 +3044,10 @@ function buildShapeControls(){
 /* ============================================================
    PATTERN CONTROLS (mode-dependent)
    ============================================================ */
-/* Shapes whose rings are geometrically scaled (circle, square) can vary font size
-   across rings. Other shapes always use the single Font size slider. */
-function sizeVaryShape(){ return state.shape==="circle" || state.shape==="square" || state.shape==="rectangle"; }
+/* Shapes that can vary font size across their bands: concentric rings (circle,
+   square, rectangle) and the sun's per-ray lines. Other shapes always use the
+   single Font size slider. */
+function sizeVaryShape(){ return state.shape!=="pyramid"; }   // every shape but pyramid can vary size per line/ring
 /* With "Vary font size per ring" OFF, the single Font size slider applies uniformly.
    ON: it's hidden and two sliders (outer/inner ring px) appear — middle rings
    interpolate linearly between them. */
@@ -2907,24 +3055,74 @@ function syncSizeControls(){
   const ff=$("#fontSizeField"), cc=$("#circleSizeControl");
   if(!ff||!cc) return;
   cc.innerHTML="";
-  if(!sizeVaryShape()){ ff.hidden=false; cc.hidden=true; return; }
+  // Reset the single Font size slider's disabled state; pyramid re-disables it below.
+  const fi=$("#fontSize"), fn=$("#fontSizeN");
+  ff.classList.remove("is-disabled"); ff.title="";
+  if(fi) fi.disabled=false; if(fn) fn.disabled=false;
+  if(!sizeVaryShape()){
+    ff.hidden=false; cc.hidden=true;
+    // Pyramid auto-fits each edge's glyphs to its length, so the font-size slider has
+    // no effect — disable it to signal that.
+    if(state.shape==="pyramid"){
+      ff.classList.add("is-disabled");
+      ff.title="Pyramid auto-sizes text to each edge — font size has no effect.";
+      if(fi) fi.disabled=true; if(fn) fn.disabled=true;
+    }
+    return;
+  }
   const c=state.concentric;
   const vary=!!c.sizeVary;
-  const chk=checkField("Vary font size per ring",vary,v=>{c.sizeVary=v;syncSizeControls();});
+  const band=(state.shape==="sun"||state.shape==="snail")?"line":"ring";   // sun/snail vary per line, others per ring
+  const chk=checkField(`Vary font size per ${band}`,vary,v=>{c.sizeVary=v;syncSizeControls();});
   cc.appendChild(checkSwapRow(chk, vary ? ()=>{
-    const o=c.outerPx!=null?c.outerPx:40, i=c.innerPx!=null?c.innerPx:14;
+    const o=c.outerPx!=null?c.outerPx:35, i=c.innerPx!=null?c.innerPx:58;
     c.outerPx=i; c.innerPx=o;
     syncSizeControls(); render(); saveLocal();
   } : null));
   if(vary){
-    const os=sliderField("Outer ring font size","outerPx",4,160,1,c.outerPx!=null?c.outerPx:40,v=>c.outerPx=v);
-    os.title="Font size of the outermost ring.";
-    const is=sliderField("Inner ring font size","innerPx",4,160,1,c.innerPx!=null?c.innerPx:14,v=>c.innerPx=v);
-    is.title="Font size of the innermost ring; sizes ramp linearly between the two.";
+    const os=sliderField(`Outer ${band} font size`,"outerPx",4,160,1,c.outerPx!=null?c.outerPx:35,v=>c.outerPx=v);
+    os.title=`Font size of the outermost ${band}.`;
+    const is=sliderField(`Inner ${band} font size`,"innerPx",4,160,1,c.innerPx!=null?c.innerPx:58,v=>c.innerPx=v);
+    is.title=`Font size of the innermost ${band}; sizes ramp linearly between the two.`;
     cc.appendChild(os); cc.appendChild(is);
   }
-  ff.hidden=vary;   // hide the single slider only while varying
+  ff.hidden=false;
+  setFieldDisabled(ff, vary);   // keep the single slider visible but inert while varying
   cc.hidden=false;
+}
+/* Gray out a field (slider/weight) and disable its inputs — used when a "vary" toggle
+   takes over so the single base slider stays visible but inert. */
+function setFieldDisabled(field, on){
+  if(!field) return;
+  field.classList.toggle("is-disabled", !!on);
+  $$("input",field).forEach(i=>i.disabled=!!on);
+}
+/* Shared per-line/ring weight controls: a base Font weight slider (disabled when a vary
+   mode is on) + Vary weight per line + Vary weight per repeat. `band` = "ring"|"line".
+   allowRepeat=false for shapes with no repeats (sun). */
+function addRingWeightControls(addWeight, band, allowRepeat=true){
+  const c=state.concentric;
+  const varying = c.weightVary || (allowRepeat && c.weightRepeatVary);
+  const wf=weightField("Font weight", state.fontWeight, v=>state.fontWeight=String(v));
+  if(varying) setFieldDisabled(wf, true);
+  addWeight(wf);
+  addWeight(checkSwapRow(
+    checkField(`Vary weight per ${band}`,c.weightVary,v=>{c.weightVary=v; if(v)c.weightRepeatVary=false; buildPatternControls();}),
+    c.weightVary ? ()=>{ const s=c.weightStart; c.weightStart=c.weightEnd; c.weightEnd=s; buildPatternControls(); render(); saveLocal(); } : null
+  ));
+  if(c.weightVary){
+    addWeight(weightField(`Inner ${band} weight`,c.weightStart,v=>c.weightStart=v));
+    addWeight(weightField(`Outer ${band} weight`,c.weightEnd,v=>c.weightEnd=v));
+  }
+  if(!allowRepeat) return;
+  addWeight(checkSwapRow(
+    checkField("Vary weight per repeat",c.weightRepeatVary,v=>{c.weightRepeatVary=v; if(v)c.weightVary=false; buildPatternControls();}),
+    c.weightRepeatVary ? ()=>{ const s=c.weightRepeatStart; c.weightRepeatStart=c.weightRepeatEnd; c.weightRepeatEnd=s; buildPatternControls(); render(); saveLocal(); } : null
+  ));
+  if(c.weightRepeatVary){
+    addWeight(weightField("Seam repeat weight",c.weightRepeatStart,v=>c.weightRepeatStart=v));
+    addWeight(weightField("Mid repeat weight",c.weightRepeatEnd,v=>c.weightRepeatEnd=v));
+  }
 }
 function buildPatternControls(){
   syncSizeControls();
@@ -2945,20 +3143,30 @@ function buildPatternControls(){
       const linesField=sliderField("Lines per ray","rings",1,10,1,c.rings,v=>c.rings=v);
       if(ringCount) ringCount.appendChild(linesField); else box.appendChild(linesField);
       $$("input",linesField).forEach(inp=>inp.addEventListener("input",refreshRayLineEditors));
-      // Per-line weight controls, mirroring the concentric "Vary weight per ring" block.
+      // Per-line weight controls (sun has one line per ray → no per-repeat option).
       const addWeight = ringWeight ? (e=>ringWeight.appendChild(e)) : (e=>box.appendChild(e));
       if(ringWeightGroup) ringWeightGroup.hidden=false;
-      addWeight(checkField("Vary weight per line",c.weightVary,v=>{c.weightVary=v;buildPatternControls();}));
-      if(c.weightVary){
-        addWeight(weightField("Inner line weight",c.weightStart,v=>c.weightStart=v));
-        addWeight(weightField("Outer line weight",c.weightEnd,v=>c.weightEnd=v));
-      }
+      addRingWeightControls(addWeight, "line", false);
     }
     return;
   }
+  // Single font-weight slider for shapes with one uniform weight (no per-ring variation).
+  const addUniformWeight=()=>{
+    const addWeight = ringWeight ? (e=>ringWeight.appendChild(e)) : (e=>box.appendChild(e));
+    if(ringWeightGroup) ringWeightGroup.hidden=false;
+    addWeight(weightField("Font weight", state.fontWeight, v=>state.fontWeight=String(v)));
+  };
   if(state.shape==="snail"){
     box.appendChild(insetField());
-    box.insertAdjacentHTML("beforeend",`<div class="hint">Snail runs text along one continuous spiral. Use Turns and Spacing in Shape Controls.</div>`);
+    const c=state.concentric;
+    // Lines stack rows along the spiral; each line has its own text field (per-line editors).
+    const linesField=sliderField("Lines","rings",1,10,1,c.rings,v=>c.rings=v);
+    if(ringCount) ringCount.appendChild(linesField); else box.appendChild(linesField);
+    $$("input",linesField).forEach(inp=>inp.addEventListener("input",refreshRingEditors));
+    box.insertAdjacentHTML("beforeend",`<div class="hint">Text winds along the spiral; add lines to stack rows. Use Turns in Shape Controls.</div>`);
+    const addWeight = ringWeight ? (e=>ringWeight.appendChild(e)) : (e=>box.appendChild(e));
+    if(ringWeightGroup) ringWeightGroup.hidden=false;
+    addRingWeightControls(addWeight, "line");
     return;
   }
   if(state.shape==="pyramid"){
@@ -2970,6 +3178,7 @@ function buildPatternControls(){
     if(ringCount) ringCount.appendChild(edgesField); else box.appendChild(edgesField);
     $$("input",edgesField).forEach(inp=>inp.addEventListener("input",refreshRingEditors));
     box.insertAdjacentHTML("beforeend",`<div class="hint">Each field fills one edge; the pyramid's edges cycle through the fields. Use Steps per side in Shape Controls.</div>`);
+    addUniformWeight();
     return;
   }
   const add=e=>box.appendChild(e);
@@ -2987,28 +3196,10 @@ function buildPatternControls(){
   // Circle: per-ring text size comes from the Outer/Inner ring font-size sliders in
   // the Text panel (they replace the single Font size slider). See syncSizeControls.
   add(checkField("Stagger alternate rings (offset seam)",c.alternate,v=>c.alternate=v));
-  // Per-ring weight controls live in the left Text panel (concentric only).
+  // Per-ring weight controls live in the left Text panel (base slider + vary options).
   const addWeight = ringWeight ? (e=>ringWeight.appendChild(e)) : add;
   if(ringWeightGroup) ringWeightGroup.hidden=false;
-  // Per-ring and per-repeat weight are mutually exclusive — enabling one clears the
-  // other (both would fight over the same glyph weights).
-  addWeight(checkSwapRow(
-    checkField("Vary weight per ring",c.weightVary,v=>{c.weightVary=v; if(v)c.weightRepeatVary=false; buildPatternControls();}),
-    c.weightVary ? ()=>{ const s=c.weightStart; c.weightStart=c.weightEnd; c.weightEnd=s; buildPatternControls(); render(); saveLocal(); } : null
-  ));
-  if(c.weightVary){
-    addWeight(weightField("Inner ring weight",c.weightStart,v=>c.weightStart=v));
-    addWeight(weightField("Outer ring weight",c.weightEnd,v=>c.weightEnd=v));
-  }
-  // Per-repeat weight: cycles thickness across the repeats within each ring (seam-safe ping-pong).
-  addWeight(checkSwapRow(
-    checkField("Vary weight per repeat",c.weightRepeatVary,v=>{c.weightRepeatVary=v; if(v)c.weightVary=false; buildPatternControls();}),
-    c.weightRepeatVary ? ()=>{ const s=c.weightRepeatStart; c.weightRepeatStart=c.weightRepeatEnd; c.weightRepeatEnd=s; buildPatternControls(); render(); saveLocal(); } : null
-  ));
-  if(c.weightRepeatVary){
-    addWeight(weightField("Seam repeat weight",c.weightRepeatStart,v=>c.weightRepeatStart=v));
-    addWeight(weightField("Mid repeat weight",c.weightRepeatEnd,v=>c.weightRepeatEnd=v));
-  }
+  addRingWeightControls(addWeight, "ring");
   // Rings slider (now in the left Text panel) resyncs the per-ring editors on commit.
   $$("input",ringsField).forEach(inp=>inp.addEventListener("input",refreshRingEditors));
 }
@@ -3135,14 +3326,14 @@ function normalizeStateShape(){
   state.underline=false;
   state.reverseChars=false;
   state.fontWeight="400";
-  if(typeof state.patternInset!=="number")state.patternInset=0;
+  if(typeof state.patternInset!=="number")state.patternInset=120;
   if(!state.anim||typeof state.anim!=="object")state.anim=structuredClone(DEFAULT_STATE.anim);
   if(!state.anim.motions||typeof state.anim.motions!=="object")state.anim.motions=structuredClone(DEFAULT_STATE.anim.motions);
   if(!state.anim.audio||typeof state.anim.audio!=="object")state.anim.audio=structuredClone(DEFAULT_STATE.anim.audio);
   state.anim.audio.reactive=!!state.anim.audio.reactive;
   state.anim.audio.flash=!!(state.anim.audio.flash||state.anim.audio.hue);
   delete state.anim.audio.hue;
-  state.anim.audio.sens=(typeof state.anim.audio.sens==="number")?clamp(Math.round(state.anim.audio.sens*10)/10,0.5,4):1.5;
+  state.anim.audio.sens=(typeof state.anim.audio.sens==="number")?clamp(Math.round(state.anim.audio.sens*2)/2,0.5,4):1.5;
   // migrate old schema (duration/spinTurns/ringSpeed/secPerRotation) → rpm model
   if(typeof state.anim.rpm!=="number"){
     const sec=(typeof state.anim.secPerRotation==="number")?state.anim.secPerRotation
@@ -3219,6 +3410,8 @@ const SPACING_CURVE_DEFAULT={slope:0.85, offset:0};
 /* When autoSpacing is on, derive concentric ring spacing from the font size so
    one slider drives both. Rebuilds the pattern panel to show the new value. */
 const SNAIL_SPACING_RATIO=1.2; // turn gap must clear glyph height so adjacent turns never collide
+const SNAIL_ROW_RATIO=1.0;     // multiline snail: tight row-to-row gap inside a group
+const SNAIL_GROUP_EXTRA=0.6;   // extra gap added between groups of rows (per turn)
 function syncAutoSpacing(){
   if(state.shape==="snail"){
     if(state.sp.spiralAutoSpacing){
@@ -3520,16 +3713,10 @@ function initSections(){
    ============================================================ */
 function initStage(){
   $("#togglePanelsBtn").addEventListener("click",()=>{
+    // Panels slide over the full-bleed canvas. Never refit on toggle — the pattern
+    // keeps its exact size and position; sidebars just slide in/out on top of it.
     document.body.classList.toggle("hide-sidepanels");
     syncPanelsToggle();
-    // Hiding: leave the pattern exactly where it is (panels slide off over it, no
-    // refit, no jump). Showing: refit back into the band between the panels once
-    // they've slid in — handled by the #left transitionend below.
-  });
-  // Only refit when panels are being SHOWN — fit the pattern into their final
-  // slot after the slide lands. When hidden, do nothing so the canvas stays put.
-  const lp=$("#left"); if(lp) lp.addEventListener("transitionend",e=>{
-    if(e.propertyName==="transform" && !document.body.classList.contains("hide-sidepanels")) fitView();
   });
   syncPanelsToggle();
 }
@@ -3808,6 +3995,7 @@ function stopAudioCapture(){
   if(btn){ btn.textContent="▶ Capture audio"; btn.classList.remove("is-capturing"); btn.disabled=false; }
   if(st) st.textContent="Click Capture, pick a tab or window, and tick “Share tab audio.”";
   const root=$("#animRoot"); if(root) root.style.filter="";
+  const ov=$("#flashOverlay"); if(ov) ov.style.opacity="0";
   animResetFrame();
   if(state.anim.enabled && animAnyMotion()){ animRuntime.t0=0; if(!animRuntime.playing) startAnim(); }
   else stopAnim(true);
@@ -3848,12 +4036,19 @@ function audioFrame(now){
     t+=`translate(${cx} ${cy}) scale(${s.toFixed(4)}) translate(${-cx} ${-cy}) `;
   }
   root.setAttribute("transform",t.trim());
-  if(m.fade) root.setAttribute("opacity",clamp(0.15+0.85*ar.env.amp,0,1).toFixed(3));
+  if(m.fade) root.setAttribute("opacity",clamp(0.45+0.9*ar.env.amp,0,1).toFixed(3));
   else root.removeAttribute("opacity");
+  const ov=$("#flashOverlay");
   if(a.audio&&a.audio.flash){
     const e=ar.env.amp;   // beat-following amplitude envelope
+    // Filter brightens colored patterns; overlay wash guarantees a visible strobe
+    // even for flat black/white patterns (where multiplicative brightness is a no-op).
     root.style.filter=`brightness(${(1+0.7*e).toFixed(3)}) contrast(${(1+0.6*e).toFixed(3)}) saturate(${(1+0.8*e).toFixed(3)})`;
-  } else root.style.filter="";
+    if(ov) ov.style.opacity=(0.7*e*e).toFixed(3);   // squared → punchier on beats, quiet between
+  } else {
+    root.style.filter="";
+    if(ov) ov.style.opacity="0";
+  }
 
   // per-ring counter-rotate: alternate rings spin opposite at the (bass-driven) spin
   // rate. Ring's own angle = sign·spinAngle − parentSpin, so it nets to sign·spinAngle.
@@ -4123,7 +4318,7 @@ function initAnim(){
     updateAnimUi(); syncPlayback(); saveLocal();
   });
   check("audioFlash",v=>state.anim.audio.flash=v);
-  pair("audioSens","audioSensN",v=>{ state.anim.audio.sens=clamp(Math.round(v*10)/10,0.5,4); audioRuntime.sens=state.anim.audio.sens; });
+  pair("audioSens","audioSensN",v=>{ state.anim.audio.sens=clamp(Math.round(v*2)/2,0.5,4); audioRuntime.sens=state.anim.audio.sens; });
   const capBtn=$("#audioCapture");
   if(capBtn) capBtn.addEventListener("click",()=>{ audioLive()?stopAudioCapture():startAudioCapture(); });
   audioRuntime.sens=(state.anim.audio&&state.anim.audio.sens)||1.5;
