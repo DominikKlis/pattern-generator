@@ -3207,8 +3207,34 @@ function buildPatternControls(){
 /* ============================================================
    CLEAN SVG SERIALIZATION FOR EXPORT
    ============================================================ */
+// Embed the Gotham faces actually used by the SVG as @font-face rules, so the
+// exported file renders the real font anywhere — outside the app there is no
+// FontFace registration and "gotham" would otherwise fall back to sans-serif.
+function embedFontsInSvg(svg){
+  if(!window.GOTHAM_OTF_B64) return;
+  const used=new Set();
+  svg.querySelectorAll("text").forEach(t=>{
+    let w=parseInt(t.getAttribute("font-weight"),10);
+    if(!w||isNaN(w)) w=400;
+    used.add(typeof snapWeight==="function"?snapWeight(w):w);
+  });
+  if(!used.size) used.add(400);
+  const rules=[...used].sort((a,b)=>a-b).map(w=>{
+    const b64=window.GOTHAM_OTF_B64[w];
+    if(!b64) return "";
+    return `@font-face{font-family:'gotham';font-weight:${w};font-style:normal;`
+      +`src:url(data:font/otf;base64,${b64}) format('opentype');}`;
+  }).filter(Boolean).join("\n");
+  if(!rules) return;
+  const defs=svg.querySelector("defs")||svg.insertBefore(el("defs"),svg.firstChild);
+  const style=document.createElementNS("http://www.w3.org/2000/svg","style");
+  style.setAttribute("type","text/css");
+  style.textContent=rules;
+  defs.insertBefore(style,defs.firstChild);
+}
 function serializeCleanSvg(){
   const svg=buildSVG(true); // guides/grid excluded
+  embedFontsInSvg(svg);
   const s=new XMLSerializer().serializeToString(svg);
   return '<?xml version="1.0" encoding="UTF-8"?>\n'+s;
 }
