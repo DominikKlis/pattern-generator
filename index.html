@@ -538,6 +538,17 @@ body.ui-dark .util-sep{background:rgba(255,255,255,.24)}
 .export-popover .mini-label{display:block;margin-bottom:8px}
 .export-div{height:1px;background:var(--line);margin:14px 0}
 body.ui-dark .export-popover{box-shadow:0 12px 34px rgba(0,0,0,.55)}
+/* Export trigger — fixed floating button at the bottom-right of the viewport */
+.export-fab{
+  position:fixed;right:18px;bottom:18px;z-index:61;
+  padding:10px 16px;border:0;cursor:pointer;
+  font:700 11px/16px var(--sans);letter-spacing:.1em;text-transform:uppercase;
+  background:#181818;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.22);
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.export-fab:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(0,0,0,.28)}
+.export-fab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body.ui-dark .export-fab{background:#fff;color:#000;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 #center{position:fixed;inset:0;display:block;background:var(--stage-bg)}
 #stage-wrap{position:absolute;inset:0;background:var(--stage-bg)}
 .pv-light #stage-wrap{background:var(--stage-bg)}
@@ -1042,8 +1053,6 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
       <button class="util-link" id="togglePanelsBtn" type="button" title="Hide panels" aria-label="Hide panels" aria-pressed="false">Hide</button>
       <span class="util-sep" aria-hidden="true"></span>
       <button class="util-link" id="themeToggle" type="button" title="Switch to dark mode" aria-label="Switch to dark mode" aria-pressed="false">Dark</button>
-      <span class="util-sep" aria-hidden="true"></span>
-      <button class="util-link" id="exportToggle" type="button" title="Export" aria-label="Export" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-export">Export ▾</button>
     </div>
 
     <!-- Settings category tabs -->
@@ -1273,6 +1282,8 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
 
     </div>
 
+    <button class="export-fab" id="exportToggle" type="button" title="Export" aria-label="Export" aria-haspopup="dialog" aria-expanded="false" aria-controls="panel-export">Export ▾</button>
+
     <div class="export-popover" data-panel="export" id="panel-export" role="dialog" aria-label="Export" aria-labelledby="exportToggle" tabindex="-1" hidden>
 
       <span class="mini-label">SVG</span>
@@ -1376,7 +1387,7 @@ const DEFAULT_STATE = {
     w:0.6, h:1, radius:40, sides:6, points:5, innerRatio:0.5, rotate:0,
     spiralTurns:4, spiralSpacing:34, spiralAutoSpacing:true, waveAmp:70, waveFreq:3, thickness:60,
     steps:5, stepW:80, stepH:80, topW:120, baseW:520, teeth:10,
-    rayStart:35, rayLines:1, rayLineGap:0, rayRot:0,
+    rayStart:35, rayLines:1, rayLineGap:0, rayRot:0, snailGap:0,
     pyrSteps:3, mtnHeight:1, pyrGap:5, pyrFit:1
   },
   // pattern params
@@ -1685,7 +1696,7 @@ function createShapePath(shapeType, sp){
         const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
         d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);
       }
-      outline=d; clip=""; const rr=gm.spc*gm.turns+gm.r0; bbox={x:cx-rr,y:cy-rr,w:2*rr,h:2*rr};
+      outline=d; clip=""; const rr=gm.spcFit*gm.turns+gm.r0; bbox={x:cx-rr,y:cy-rr,w:2*rr,h:2*rr};
       extra={openPath:true,layout:"snail",cx,cy};
       break;
     }
@@ -2634,10 +2645,18 @@ function snailGeom(sp){
   const lines=clamp(Math.round(state.concentric.rings||1),1,10);
   const sizes=snailLineSizes(lines);
   const rowH=sizes.map(s=>Math.max(6, s*SNAIL_ROW_RATIO));
+  const userGap=sp.snailGap!=null?sp.snailGap:0;   // extra pitch added uniformly between every line
+  // Every line is spaced by the same pitch (rowH+userGap), INCLUDING across the turn
+  // boundary — there is no extra group gap — so the spiral reads as evenly-spaced lines
+  // rather than repeating bundles. Adding userGap after the last line too keeps the
+  // turn-boundary pitch equal to the within-turn pitch.
   const offsets=[]; let acc=0;
-  for(let k=0;k<lines;k++){ offsets.push(acc); acc+=rowH[k]; }
-  const groupGap=Math.round(state.fontSize*SNAIL_GROUP_EXTRA);
-  return {turns,lines,sizes,offsets,spc:acc+groupGap,r0:8};
+  for(let k=0;k<lines;k++){ offsets.push(acc); acc+=rowH[k]+userGap; }
+  const spc=acc;                                   // per-turn radial step = sum of the equal line pitches
+  // spcFit drives the fit bbox and IGNORES userGap, so widening the spacing never
+  // rescales the art — glyph size stays put (mirrors the sun's fixed-radius line spacing).
+  const spcFit=rowH.reduce((s,h)=>s+h,0);
+  return {turns,lines,sizes,offsets,spc,spcFit,r0:8};
 }
 /* One Archimedean spiral whose turn gap holds `lines` stacked rows. Each row is a
    radially-offset copy of the spiral carrying its own text field (like rings), so the
@@ -3035,6 +3054,7 @@ function buildShapeControls(){
     // Snail turn spacing always auto-derives from font size (see createShapePath), so
     // it exposes only Turns — no auto-spacing toggle, no manual spacing slider.
     add(sliderField("Turns","spiralTurns",1,10,1,sp.spiralTurns,v=>sp.spiralTurns=v));
+    add(sliderField("Line spacing","snailGap",0,100,1,sp.snailGap!=null?sp.snailGap:0,v=>sp.snailGap=v));
   }
   refreshRayLineEditors();
   const grp=$("#shapeCtlGroup");
@@ -3436,8 +3456,7 @@ const SPACING_CURVE_DEFAULT={slope:0.85, offset:0};
 /* When autoSpacing is on, derive concentric ring spacing from the font size so
    one slider drives both. Rebuilds the pattern panel to show the new value. */
 const SNAIL_SPACING_RATIO=1.2; // turn gap must clear glyph height so adjacent turns never collide
-const SNAIL_ROW_RATIO=1.0;     // multiline snail: tight row-to-row gap inside a group
-const SNAIL_GROUP_EXTRA=0.6;   // extra gap added between groups of rows (per turn)
+const SNAIL_ROW_RATIO=1.0;     // multiline snail: base line-to-line pitch (× font size) before Line spacing
 function syncAutoSpacing(){
   if(state.shape==="snail"){
     if(state.sp.spiralAutoSpacing){
@@ -3797,11 +3816,13 @@ function initExportPopover(){
 
   function position(){
     const r=btn.getBoundingClientRect();
-    const w=pop.offsetWidth;
+    const w=pop.offsetWidth, h=pop.offsetHeight;
     let left=r.right-w;                 // right-align to the button
     left=Math.max(8,Math.min(left,window.innerWidth-w-8));
+    let top=r.top-8-h;                   // open upward from the bottom-right button
+    top=Math.max(8,top);
     pop.style.left=left+"px";
-    pop.style.top=(r.bottom+8)+"px";
+    pop.style.top=top+"px";
   }
   function isOpen(){ return !pop.hidden; }
   function open(){
