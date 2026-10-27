@@ -1,8 +1,3 @@
 .DS_Store
 **/.DS_Store
-
-# Licensed fonts — Frere-Jones Desktop EULA forbids web use/distribution.
-# Never commit these. See LICENSING.md.
-fonts/
-Cassis-10092/
-Cassis-10092.zip
+Gotham/
