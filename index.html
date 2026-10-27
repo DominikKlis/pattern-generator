@@ -1061,8 +1061,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
     <div class="sidebar-tabs" role="tablist" aria-label="Settings categories">
       <button class="sidebar-tab active" type="button" role="tab" id="tab-pattern" aria-controls="panel-pattern" aria-selected="true" tabindex="0" data-tab="pattern">Pattern</button>
       <button class="sidebar-tab" type="button" role="tab" id="tab-canvas" aria-controls="panel-canvas" aria-selected="false" tabindex="-1" data-tab="canvas">Canvas</button>
-      <!-- Animate tab hidden: panel + logic stay wired, only the entry point is gone. -->
-      <button class="sidebar-tab" type="button" role="tab" id="tab-animate" aria-controls="panel-animate" aria-selected="false" tabindex="-1" data-tab="animate" hidden>Animate</button>
+      <button class="sidebar-tab" type="button" role="tab" id="tab-animate" aria-controls="panel-animate" aria-selected="false" tabindex="-1" data-tab="animate">Animate</button>
     </div>
 
     <!-- ===== Pattern panel: shape, its controls, pattern, transform ===== -->
@@ -1294,9 +1293,7 @@ body.ui-dark input[type=range]{ --slider-track:#4a4a4a; }
         <button class="btn primary" id="exportBtn2">⬇ Download SVG</button>
       </div>
 
-      <!-- Lottie export hidden alongside the Animate tab: markup + logic stay wired,
-           only the entry point is gone. Inputs stay in the DOM so bindings hold. -->
-      <div id="exportLottieSection" hidden>
+      <div id="exportLottieSection">
         <div class="export-div"></div>
 
         <span class="mini-label">Lottie (animated)</span>
